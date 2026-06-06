@@ -42,5 +42,9 @@ class DatabaseSeeder extends Seeder
             'email' => 'manager@example.com',
             'role' => 'manager',
         ]);
+
+        $this->call([
+            SalesPortalSeeder::class,
+        ]);
     }
 }
