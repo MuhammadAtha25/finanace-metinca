@@ -26,6 +26,8 @@ class InvoiceController extends Controller
                 'tax_amount' => (double) $inv->tax_amount,
                 'dp_amount' => (double) $inv->dp_amount,
                 'total_amount' => (double) $inv->total_amount,
+                'currency' => $inv->currency,
+                'exchange_rate' => (double) $inv->exchange_rate,
                 'status' => $inv->status,
                 'created_at' => $inv->created_at->format('M d, Y H:i'),
             ]);
@@ -39,10 +41,12 @@ class InvoiceController extends Controller
     {
         $request->validate([
             'order_id' => 'required|exists:orders,id',
-            'invoice_type' => 'required|in:tua_lokal,inter_expor',
+            'invoice_type' => 'required|in:domestik,international',
             'dp_amount' => 'nullable|numeric|min:0',
             'due_date' => 'nullable|date',
             'delivery_date' => 'nullable|date',
+            'tax_percent' => 'nullable|numeric|min:0|max:100',
+            'exchange_rate' => 'nullable|numeric|min:0.000001',
         ]);
 
         $order = Order::with('items')->findOrFail($request->order_id);
@@ -57,17 +61,21 @@ class InvoiceController extends Controller
             return redirect()->back()->with('error', 'Invoice already exists for this order.');
         }
 
-        // Calculate subtotal from order items
+        // Calculate subtotal from order items (in IDR)
         $subtotal = $order->items->sum(fn($item) => $item->price * $item->quantity);
-        $dpAmount = (float) ($request->input('dp_amount', 0) ?? 0);
+        
+        $exchangeRate = (float) $request->input('exchange_rate', $order->exchange_rate ?? 1);
+        $taxPercent = $request->has('tax_percent') 
+            ? (float) $request->input('tax_percent') 
+            : ($request->invoice_type === 'domestik' ? Tax::PERCENT : 0);
 
-        $taxPercent = 0;
-        $taxAmount = 0;
+        // Input DP is in the order's foreign currency if not IDR. Convert to IDR for DB storage.
+        $dpAmountInput = (float) ($request->input('dp_amount', 0) ?? 0);
+        $dpAmount = ($order->currency && $order->currency !== 'IDR') 
+            ? ($dpAmountInput * $exchangeRate) 
+            : $dpAmountInput;
 
-        if ($request->invoice_type === 'tua_lokal') {
-            $taxPercent = Tax::PERCENT;
-            $taxAmount = Tax::on($subtotal);
-        }
+        $taxAmount = $subtotal * ($taxPercent / 100);
 
         // The down payment can never exceed what is owed.
         if ($dpAmount > $subtotal + $taxAmount) {
@@ -85,7 +93,7 @@ class InvoiceController extends Controller
             'dp_amount' => round($dpAmount, 2),
             'total_amount' => round($totalAmount, 2),
             'currency' => $order->currency ?? 'IDR',
-            'exchange_rate' => $order->exchange_rate ?? 1,
+            'exchange_rate' => $exchangeRate,
             'due_date' => $request->due_date,
             'delivery_date' => $request->delivery_date,
             'status' => 'Draft',

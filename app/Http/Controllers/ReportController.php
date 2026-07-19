@@ -29,7 +29,7 @@ class ReportController extends Controller
                     
                     // Deadline calculation
                     // For local, use delivery_date if available, otherwise due_date
-                    $deadlineDate = $inv->invoice_type === 'tua_lokal' && $inv->delivery_date 
+                    $deadlineDate = $inv->invoice_type === 'domestik' && $inv->delivery_date 
                         ? Carbon::parse($inv->delivery_date) 
                         : ($inv->due_date ? Carbon::parse($inv->due_date) : null);
                     

@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ShoppingCart, Clock, CheckCircle2, TrendingUp, ArrowUpRight, DollarSign } from 'lucide-react';
+import { ShoppingCart, Clock, CheckCircle2, TrendingUp, ArrowUpRight, DollarSign, Undo2 } from 'lucide-react';
 import { useCurrency } from '@/components/currency-context';
 import { useLanguage } from '@/components/language-context';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ interface MetricProps {
     total_orders: number;
     pending_orders: number;
     validated_orders: number;
+    approved_returns: number;
 }
 
 interface ChartDataItem {
@@ -68,7 +69,7 @@ export default function Dashboard({ metrics, chart_data, recent_orders }: Dashbo
                 )}
 
                 {/* KPI Metrics Grid */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                     <Card className="border border-sidebar-border/75">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
                             <CardTitle className="text-sm font-medium">{t('Total Penjualan', 'Total Sales')}</CardTitle>
@@ -103,7 +104,7 @@ export default function Dashboard({ metrics, chart_data, recent_orders }: Dashbo
                         <CardContent>
                             <div className="text-2xl font-bold">{metrics.pending_orders}</div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                {t('Menunggu validasi', 'Awaiting validation')}
+                                {role === 'staff_sales' ? t('Draft pesanan', 'Draft orders') : t('Menunggu validasi', 'Awaiting validation')}
                             </p>
                         </CardContent>
                     </Card>
@@ -117,6 +118,19 @@ export default function Dashboard({ metrics, chart_data, recent_orders }: Dashbo
                             <div className="text-2xl font-bold">{metrics.validated_orders}</div>
                             <p className="text-xs text-muted-foreground mt-1">
                                 {t('Siap dikirim', 'Ready for shipment')}
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border border-sidebar-border/75">
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">{t('Retur Disetujui', 'Approved Returns')}</CardTitle>
+                            <Undo2 className="text-emerald-500 size-4" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{metrics.approved_returns}</div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                                {t('Sudah diproses', 'Already processed')}
                             </p>
                         </CardContent>
                     </Card>
@@ -136,7 +150,8 @@ export default function Dashboard({ metrics, chart_data, recent_orders }: Dashbo
                                 </div>
                             ) : (
                                 (() => {
-                                    const maxChartValue = Math.max(...chart_data.map(d => d.sales), 1000);
+                                    // Tetapkan nilai maksimum minimal agar batang tidak selalu 100% jika hanya ada 1 data.
+                                    const maxChartValue = Math.max(...chart_data.map(d => d.sales), 100000000); // 100 Juta baseline
                                     return chart_data.map((item, idx) => {
                                         const heightPercent = (item.sales / maxChartValue) * 100;
 

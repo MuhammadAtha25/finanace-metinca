@@ -38,8 +38,18 @@ class SalesPortalController extends Controller
 
         $totalSales = (float) $orders->where('status', OrderStatus::VALIDATED)->sum('total_amount');
         $totalOrdersCount = $orders->count();
-        $pendingCount = $orders->where('status', OrderStatus::PENDING)->count();
+        $pendingCount = $user->isSales()
+            ? $orders->where('status', OrderStatus::PENDING)->count()
+            : $orders->where('status', OrderStatus::SUBMITTED)->count();
         $validatedCount = $orders->where('status', OrderStatus::VALIDATED)->count();
+
+        $returnsQuery = \App\Models\ReturnNote::query();
+        if ($user->isSales()) {
+            $returnsQuery->whereHas('order', function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            });
+        }
+        $approvedReturnsCount = $returnsQuery->where('status', 'Approved')->count();
 
         $chartData = SalesTrend::monthlyValidated(
             $user->isSales() ? $user->id : null
@@ -55,6 +65,7 @@ class SalesPortalController extends Controller
                 'total_orders' => $totalOrdersCount,
                 'pending_orders' => $pendingCount,
                 'validated_orders' => $validatedCount,
+                'approved_returns' => $approvedReturnsCount,
             ],
             'chart_data' => $chartData,
             'recent_orders' => $orders->take(5)->map(fn ($o) => [

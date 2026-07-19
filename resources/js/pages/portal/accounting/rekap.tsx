@@ -21,6 +21,8 @@ interface RecapItem {
     total_amount: number;
     has_invoice: boolean;
     invoice_id: string | null;
+    currency: string;
+    exchange_rate: number;
 }
 
 interface RekapProps {
@@ -36,11 +38,33 @@ export default function Rekap({ orders }: RekapProps) {
 
     const { data, setData, post, processing, errors, reset } = useForm({
         order_id: '',
-        invoice_type: 'tua_lokal',
+        invoice_type: 'domestik',
         dp_amount: 0,
         due_date: '',
         delivery_date: '',
+        tax_percent: 11,
+        exchange_rate: 1,
     });
+
+    const formatPriceWithCurrency = (amount: number, currencyCode: string) => {
+        if (currencyCode === 'USD') {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+            }).format(amount);
+        } else if (currencyCode === 'EUR') {
+            return new Intl.NumberFormat('de-DE', {
+                style: 'currency',
+                currency: 'EUR',
+            }).format(amount);
+        }
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount);
+    };
 
     const grandTotalSales = React.useMemo(() => {
         return orders.reduce((sum, item) => sum + Number(item.total_amount), 0);
@@ -49,16 +73,34 @@ export default function Rekap({ orders }: RekapProps) {
     // Live calculation for the modal
     const calculation = React.useMemo(() => {
         if (!activeOrder) {
-return { subtotal: 0, tax: 0, total: 0 };
-}
+            return {
+                subtotal_idr: 0, tax_idr: 0, dp_idr: 0, total_idr: 0,
+                subtotal_orig: 0, tax_orig: 0, dp_orig: 0, total_orig: 0
+            };
+        }
 
-        // Since orders.total_amount is stored as subtotal * 1.11, the base subtotal is:
-        const subtotal = Number(activeOrder.total_amount) / 1.11;
-        const tax = data.invoice_type === 'tua_lokal' ? subtotal * 0.11 : 0;
-        const total = subtotal + tax - (Number(data.dp_amount) || 0);
+        const exchangeRate = Number(data.exchange_rate) || 1;
+        const taxPercent = Number(data.tax_percent) || 0;
+        
+        // base subtotal in IDR (order total amount is subtotal * 1.11)
+        const subtotal_idr = Number(activeOrder.total_amount) / 1.11;
+        const tax_idr = subtotal_idr * (taxPercent / 100);
+        
+        const dp_amount_orig = Number(data.dp_amount) || 0;
+        const dp_idr = activeOrder.currency === 'IDR' ? dp_amount_orig : dp_amount_orig * exchangeRate;
+        
+        const total_idr = subtotal_idr + tax_idr - dp_idr;
 
-        return { subtotal, tax, total };
-    }, [activeOrder, data.invoice_type, data.dp_amount]);
+        const subtotal_orig = activeOrder.currency === 'IDR' ? subtotal_idr : subtotal_idr / exchangeRate;
+        const tax_orig = activeOrder.currency === 'IDR' ? tax_idr : tax_idr / exchangeRate;
+        const dp_orig = dp_amount_orig;
+        const total_orig = activeOrder.currency === 'IDR' ? total_idr : total_idr / exchangeRate;
+
+        return {
+            subtotal_idr, tax_idr, dp_idr, total_idr,
+            subtotal_orig, tax_orig, dp_orig, total_orig
+        };
+    }, [activeOrder, data.tax_percent, data.exchange_rate, data.dp_amount]);
 
     const handleSubmitInvoice = (e: React.FormEvent) => {
         e.preventDefault();
@@ -152,8 +194,12 @@ return { subtotal: 0, tax: 0, total: 0 };
                                                         setActiveOrder(order);
                                                         setData({
                                                             order_id: order.id,
-                                                            invoice_type: 'tua_lokal',
+                                                            invoice_type: 'domestik',
                                                             dp_amount: 0,
+                                                            due_date: '',
+                                                            delivery_date: '',
+                                                            tax_percent: 11,
+                                                            exchange_rate: order.exchange_rate || 1,
                                                         });
                                                         setIsOpen(true);
                                                     }}
@@ -190,33 +236,77 @@ return { subtotal: 0, tax: 0, total: 0 };
                     </DialogHeader>
 
                     <form onSubmit={handleSubmitInvoice} className="space-y-4 py-2">
-                        {/* Tipe Invoice */}
-                        <div className="grid gap-2">
-                            <Label htmlFor="invoice_type">{t('Jenis Invoice', 'Invoice Type')}</Label>
-                            <Select
-                                value={data.invoice_type}
-                                onValueChange={(value) => setData('invoice_type', value as any)}
-                            >
-                                <SelectTrigger id="invoice_type" className="w-full">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="tua_lokal">{t('Tua Lokal (Accounting) - PPN 11%', 'Tua Lokal (Accounting) - VAT 11%')}</SelectItem>
-                                    <SelectItem value="inter_expor">{t('Inter Expor (Exim) - Tanpa PPN', 'Inter Expor (Exim) - No VAT')}</SelectItem>
-                                </SelectContent>
-                            </Select>
+                        {/* Tipe Invoice & Tax Percent */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="invoice_type">{t('Jenis Invoice', 'Invoice Type')}</Label>
+                                <Select
+                                    value={data.invoice_type}
+                                    onValueChange={(value) => {
+                                        setData((prev) => ({
+                                            ...prev,
+                                            invoice_type: value as any,
+                                            tax_percent: value === 'domestik' ? 11 : 0
+                                        }));
+                                    }}
+                                >
+                                    <SelectTrigger id="invoice_type" className="w-full">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="domestik">{t('Domestik', 'Domestic')}</SelectItem>
+                                        <SelectItem value="international">{t('Internasional', 'International')}</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="tax_percent">{t('Tarif Pajak / PPN (%)', 'Tax / VAT Rate (%)')}</Label>
+                                <Input
+                                    id="tax_percent"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="0.1"
+                                    value={data.tax_percent}
+                                    onChange={(e) => setData('tax_percent', Number(e.target.value))}
+                                    placeholder="PPN %"
+                                />
+                            </div>
                         </div>
+
+                        {/* Exchange Rate (show if order currency is not IDR) */}
+                        {activeOrder?.currency !== 'IDR' && (
+                            <div className="grid gap-2">
+                                <Label htmlFor="exchange_rate">
+                                    {t(`Nilai Tukar (1 ${activeOrder?.currency} = ... IDR)`, `Exchange Rate (1 ${activeOrder?.currency} = ... IDR)`)}
+                                </Label>
+                                <Input
+                                    id="exchange_rate"
+                                    type="number"
+                                    step="0.000001"
+                                    min="0.000001"
+                                    value={data.exchange_rate}
+                                    onChange={(e) => setData('exchange_rate', Number(e.target.value))}
+                                    placeholder="Exchange rate"
+                                />
+                            </div>
+                        )}
 
                         {/* DP (Down Payment) */}
                         <div className="grid gap-2">
-                            <Label htmlFor="dp_amount">{t('Uang Muka / DP (Opsional)', 'Down Payment (Optional)')}</Label>
+                            <Label htmlFor="dp_amount">
+                                {t(
+                                    `Uang Muka / DP (${activeOrder?.currency})`, 
+                                    `Down Payment (${activeOrder?.currency})`
+                                )}
+                            </Label>
                             <Input
                                 id="dp_amount"
                                 type="number"
                                 min="0"
                                 value={data.dp_amount === 0 ? '' : data.dp_amount}
                                 onChange={(e) => setData('dp_amount', Number(e.target.value))}
-                                placeholder="Masukkan nominal DP jika ada"
+                                placeholder={t(`Masukkan DP dalam ${activeOrder?.currency}`, `Enter DP in ${activeOrder?.currency}`)}
                             />
                         </div>
 
@@ -246,21 +336,57 @@ return { subtotal: 0, tax: 0, total: 0 };
                         <div className="border-t pt-3 mt-4 space-y-2 text-xs">
                             <div className="flex justify-between text-muted-foreground">
                                 <span>Subtotal</span>
-                                <span>{formatPrice(calculation.subtotal)}</span>
+                                <div className="text-right">
+                                    <div className="font-semibold">
+                                        {formatPriceWithCurrency(calculation.subtotal_orig, activeOrder?.currency || 'IDR')}
+                                    </div>
+                                    {activeOrder?.currency !== 'IDR' && (
+                                        <div className="text-[10px] text-muted-foreground/80">
+                                            {formatPriceWithCurrency(calculation.subtotal_idr, 'IDR')}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex justify-between text-muted-foreground">
-                                <span>PPN ({data.invoice_type === 'tua_lokal' ? '11%' : '0%'})</span>
-                                <span>{formatPrice(calculation.tax)}</span>
+                            <div className="flex justify-between text-muted-foreground border-t border-dashed pt-1">
+                                <span>PPN ({data.tax_percent}%)</span>
+                                <div className="text-right">
+                                    <div className="font-semibold">
+                                        {formatPriceWithCurrency(calculation.tax_orig, activeOrder?.currency || 'IDR')}
+                                    </div>
+                                    {activeOrder?.currency !== 'IDR' && (
+                                        <div className="text-[10px] text-muted-foreground/80">
+                                            {formatPriceWithCurrency(calculation.tax_idr, 'IDR')}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             {Number(data.dp_amount) > 0 && (
-                                <div className="flex justify-between text-red-500 font-medium">
+                                <div className="flex justify-between text-red-500 border-t border-dashed pt-1">
                                     <span>Uang Muka (DP)</span>
-                                    <span>-{formatPrice(data.dp_amount)}</span>
+                                    <div className="text-right font-medium">
+                                        <div>
+                                            -{formatPriceWithCurrency(calculation.dp_orig, activeOrder?.currency || 'IDR')}
+                                        </div>
+                                        {activeOrder?.currency !== 'IDR' && (
+                                            <div className="text-[10px] text-red-400">
+                                                -{formatPriceWithCurrency(calculation.dp_idr, 'IDR')}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
                             <div className="flex justify-between text-sm font-bold border-t pt-2 mt-1">
                                 <span>Total Tagihan (Grand Total)</span>
-                                <span className="text-primary">{formatPrice(calculation.total)}</span>
+                                <div className="text-right">
+                                    <span className="text-primary font-bold">
+                                        {formatPriceWithCurrency(calculation.total_orig, activeOrder?.currency || 'IDR')}
+                                    </span>
+                                    {activeOrder?.currency !== 'IDR' && (
+                                        <div className="text-[10px] text-muted-foreground/80 font-normal">
+                                            {formatPriceWithCurrency(calculation.total_idr, 'IDR')}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 

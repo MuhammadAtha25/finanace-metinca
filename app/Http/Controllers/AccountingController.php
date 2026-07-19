@@ -24,6 +24,8 @@ class AccountingController extends Controller
                 'sales_rep' => $o->sales_rep,
                 'status' => $o->status,
                 'total_amount' => $o->total_amount,
+                'currency' => $o->currency,
+                'exchange_rate' => (float) $o->exchange_rate,
                 'items' => $o->items->map(fn ($item) => [
                     'product_name' => $item->product->name,
                     'quantity' => $item->quantity,
@@ -85,6 +87,8 @@ class AccountingController extends Controller
                 'customer_name' => $o->customer->name,
                 'sales_rep' => $o->sales_rep,
                 'total_amount' => $o->total_amount,
+                'currency' => $o->currency,
+                'exchange_rate' => (float) $o->exchange_rate,
                 'has_invoice' => $o->invoice !== null,
                 'invoice_id' => $o->invoice ? 'INV-'.str_pad($o->invoice->id, 5, '0', STR_PAD_LEFT) : null,
             ]);

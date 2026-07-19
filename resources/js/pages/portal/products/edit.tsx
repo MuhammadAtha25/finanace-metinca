@@ -32,9 +32,6 @@ export default function EditProduct({ product }: EditProductProps) {
         name: product.name,
         category: product.category,
         unit: product.unit,
-        stock: product.stock,
-        min: product.min,
-        location: product.location || '',
         price: convertFromBase(product.price),
     });
 
@@ -93,7 +90,7 @@ export default function EditProduct({ product }: EditProductProps) {
                                         id="category"
                                         value={data.category}
                                         onChange={(e) => setData('category', e.target.value)}
-                                        placeholder={t('Contoh: SaaS, Cloud, Hardware', 'e.g. SaaS, Cloud, Hardware')}
+                                        placeholder={t('Contoh: Besi & Baja, Electronics, Furniture', 'e.g. Besi & Baja, Electronics, Furniture')}
                                     />
                                     <InputError message={errors.category} />
                                 </div>
@@ -110,40 +107,7 @@ export default function EditProduct({ product }: EditProductProps) {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                                <div className="space-y-2">
-                                    <Label htmlFor="stock">{t('Stok Awal', 'Initial Stock')}</Label>
-                                    <Input
-                                        id="stock"
-                                        type="number"
-                                        value={data.stock}
-                                        onChange={(e) => setData('stock', Number(e.target.value))}
-                                    />
-                                    <InputError message={errors.stock} />
-                                </div>
 
-                                <div className="space-y-2">
-                                    <Label htmlFor="min">{t('Stok Minimum', 'Min Stock Threshold')}</Label>
-                                    <Input
-                                        id="min"
-                                        type="number"
-                                        value={data.min}
-                                        onChange={(e) => setData('min', Number(e.target.value))}
-                                    />
-                                    <InputError message={errors.min} />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="location">{t('Lokasi Penyimpanan', 'Storage Location')}</Label>
-                                    <Input
-                                        id="location"
-                                        value={data.location}
-                                        onChange={(e) => setData('location', e.target.value)}
-                                        placeholder={t('Contoh: Rak A-3, Cloud-US', 'e.g. Shelf A-3, Cloud-US')}
-                                    />
-                                    <InputError message={errors.location} />
-                                </div>
-                            </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="price">{t('Harga Jual', 'Selling Price')} ({currency})</Label>

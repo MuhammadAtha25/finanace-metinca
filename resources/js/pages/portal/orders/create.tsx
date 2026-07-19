@@ -223,7 +223,7 @@ return;
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {products.map((p) => (
-                                                    <SelectItem key={p.id} value={String(p.id)}>{p.name} - {formatPrice(p.price)} ({t('Stok', 'Stock')}: {p.stock})</SelectItem>
+                                                    <SelectItem key={p.id} value={String(p.id)}>{p.name} - {formatPrice(p.price)}</SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
@@ -324,9 +324,19 @@ return;
                                         <span>{formatPrice(taxAmount)}</span>
                                     </div>
                                 </div>
-                                <div className="flex justify-between font-bold text-lg pt-2">
+                                <div className="flex justify-between font-bold text-lg pt-2 items-start">
                                     <span>{t('Total Akhir', 'Grand Total')}</span>
-                                    <span className="text-primary">{formatPrice(grandTotal)}</span>
+                                    <div className="flex flex-col items-end gap-1">
+                                        <span className="text-primary text-xl">{formatPrice(grandTotal)}</span>
+                                        {data.currency !== 'IDR' && data.exchangeRate > 0 && (
+                                            <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-md flex items-center gap-1 border border-sidebar-border/50">
+                                                ≈ {new Intl.NumberFormat('id-ID', {
+                                                    style: 'currency',
+                                                    currency: data.currency
+                                                }).format(grandTotal / data.exchangeRate)}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <Button 

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SalesPortalController;
 use App\Http\Controllers\InvoiceController;
 
-Route::redirect('/', '/login');
+Route::redirect('/', '/login')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [SalesPortalController::class, 'dashboard'])->name('dashboard');
@@ -56,13 +56,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('accounting/invoice-rekap', [InvoiceController::class, 'index'])->name('accounting.invoice_rekap');
         Route::post('accounting/invoices', [InvoiceController::class, 'store'])->name('accounting.invoices.store');
 
-        Route::get('reports/customer-recap', [\App\Http\Controllers\ReportController::class, 'customerRecap'])->name('reports.customer_recap');
+        // Returns approval
+        Route::post('accounting/returns/{id}/approve', [\App\Http\Controllers\ReturnController::class, 'approve'])->name('returns.approve');
+        Route::post('accounting/returns/{id}/reject', [\App\Http\Controllers\ReturnController::class, 'reject'])->name('returns.reject');
     });
 
     // Manager actions (restricted to Managers)
     Route::middleware(['role:manager'])->group(function () {
         Route::get('analytics', [\App\Http\Controllers\ManagerController::class, 'analytics'])->name('analytics');
         Route::get('analytics/export', [\App\Http\Controllers\ManagerController::class, 'exportCsv'])->name('analytics.export');
+    });
+
+    // Reports accessible by Accounting and Managers
+    Route::middleware(['role:staff_accounting,manager'])->group(function () {
+        Route::get('reports/customer-recap', [\App\Http\Controllers\ReportController::class, 'customerRecap'])->name('reports.customer_recap');
     });
 });
 

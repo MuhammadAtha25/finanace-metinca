@@ -85,8 +85,6 @@ export default function Products({ products }: ProductsProps) {
                                 <TableHead>{t('Kode', 'Code')}</TableHead>
                                 <TableHead>{t('Nama Produk', 'Product Name')}</TableHead>
                                 <TableHead>{t('Kategori', 'Category')}</TableHead>
-                                <TableHead className="text-right">{t('Stok', 'Stock')}</TableHead>
-                                <TableHead>{t('Lokasi', 'Location')}</TableHead>
                                 <TableHead className="text-right">{t('Harga', 'Price')}</TableHead>
                                 {isSales && <TableHead className="w-[80px]"></TableHead>}
                             </TableRow>
@@ -94,7 +92,7 @@ export default function Products({ products }: ProductsProps) {
                         <TableBody>
                             {filteredProducts.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={isSales ? 7 : 6} className="h-32 text-center text-muted-foreground">
+                                    <TableCell colSpan={isSales ? 5 : 4} className="h-32 text-center text-muted-foreground">
                                         <div className="flex flex-col items-center justify-center gap-2">
                                             <Package className="size-8 opacity-30" />
                                             {t('Tidak ada data produk ditemukan.', 'No products found.')}
@@ -116,25 +114,7 @@ export default function Products({ products }: ProductsProps) {
                                                     <Layers className="size-3" /> {p.category}
                                                 </span>
                                             </TableCell>
-                                            <TableCell className="text-right">
-                                                <span className={`inline-flex items-center gap-1 font-semibold ${isLowStock ? 'text-rose-600 dark:text-rose-400' : 'text-foreground'}`}>
-                                                    {p.stock}
-                                                    {isLowStock && (
-                                                        <span title={t('Stok Menipis!', 'Low Stock!')}>
-                                                            <ShieldAlert className="size-3.5" />
-                                                        </span>
-                                                    )}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell>
-                                                {p.location ? (
-                                                    <span className="flex items-center gap-1 text-muted-foreground text-sm">
-                                                        <MapPin className="size-3.5" /> {p.location}
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-muted-foreground text-xs italic">-</span>
-                                                )}
-                                            </TableCell>
+
                                             <TableCell className="text-right font-bold text-emerald-600 dark:text-emerald-400">
                                                 {formatPrice(p.price)}
                                             </TableCell>

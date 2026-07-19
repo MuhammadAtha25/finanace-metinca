@@ -135,10 +135,10 @@ export default function CustomerRecap({ customers, selectedCustomerId, invoices 
                                             <TableRow key={inv.id}>
                                                 <TableCell className="font-semibold text-blue-600 dark:text-blue-400">INV-{String(inv.id).padStart(5, '0')}</TableCell>
                                                 <TableCell>
-                                                    {inv.invoice_type === 'tua_lokal' ? (
-                                                        <Badge variant="outline" className="bg-sky-50 text-sky-700 border-sky-200">Lokal</Badge>
+                                                    {inv.invoice_type === 'domestik' ? (
+                                                        <Badge variant="outline" className="bg-sky-50 text-sky-700 border-sky-200">Domestik</Badge>
                                                     ) : (
-                                                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Expor</Badge>
+                                                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Internasional</Badge>
                                                     )}
                                                 </TableCell>
                                                 <TableCell className="text-xs text-muted-foreground space-y-1">

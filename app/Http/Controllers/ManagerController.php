@@ -20,6 +20,7 @@ class ManagerController extends Controller
         $totalSales = (float) Order::where('status', OrderStatus::VALIDATED)
             ->whereBetween('date_raised', [$startDate, $endDate])
             ->sum('total_amount');
+            
         $totalOrdersCount = Order::whereBetween('date_raised', [$startDate, $endDate])->count();
         $pendingCount = Order::where('status', OrderStatus::SUBMITTED)->count(); // waiting validation
         $validatedCount = Order::where('status', OrderStatus::VALIDATED)->count();

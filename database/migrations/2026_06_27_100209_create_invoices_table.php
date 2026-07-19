@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('order_id');
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
-            $table->enum('invoice_type', ['tua_lokal', 'inter_expor']);
+            $table->string('invoice_type');
             $table->decimal('subtotal', 15, 2);
-            $table->decimal('tax_percent', 5, 2)->default(0); // 11 for tua_lokal, 0 for inter_expor
+            $table->decimal('tax_percent', 5, 2)->default(0); // 11 for domestik, 0 for international
             $table->decimal('tax_amount', 15, 2)->default(0);
             $table->decimal('dp_amount', 15, 2)->nullable()->default(0);
             $table->decimal('total_amount', 15, 2);

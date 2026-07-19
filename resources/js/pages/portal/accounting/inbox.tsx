@@ -23,6 +23,8 @@ interface OrderItem {
     sales_rep: string;
     status: string;
     total_amount: number;
+    currency: string;
+    exchange_rate: number;
     items: OrderItemDetail[];
 }
 
@@ -184,9 +186,19 @@ export default function Inbox({ orders }: InboxProps) {
                                     </div>
 
                                     {/* Subtotal */}
-                                    <div className="flex justify-between items-center border-t pt-3 font-bold text-sm">
+                                    <div className="flex justify-between items-start border-t pt-3 font-bold text-sm">
                                         <span>Total (inc. tax/fees)</span>
-                                        <span className="text-base text-primary">{formatPrice(selectedOrder.total_amount)}</span>
+                                        <div className="flex flex-col items-end gap-1">
+                                            <span className="text-base text-primary">{formatPrice(selectedOrder.total_amount)}</span>
+                                            {selectedOrder.currency && selectedOrder.currency !== 'IDR' && selectedOrder.exchange_rate > 0 && (
+                                                <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-md flex items-center gap-1 border border-sidebar-border/50">
+                                                    ≈ {new Intl.NumberFormat('id-ID', {
+                                                        style: 'currency',
+                                                        currency: selectedOrder.currency
+                                                    }).format(selectedOrder.total_amount / selectedOrder.exchange_rate)}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Action Buttons */}
