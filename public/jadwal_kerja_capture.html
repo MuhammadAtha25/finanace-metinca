@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: #ffffff;
+      font-family: 'Times New Roman', Times, serif;
+      padding: 24px 30px;
+      display: inline-block;
+    }
+    .title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #000000;
+      margin-bottom: 12px;
+      letter-spacing: -0.2px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 960px;
+      border: 1.5px solid #000000;
+      color: #000000;
+      font-size: 17px;
+    }
+    th, td {
+      border: 1px solid #000000;
+      padding: 7px 6px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    th {
+      font-weight: normal;
+      background-color: #ffffff;
+    }
+    .col-no {
+      width: 48px;
+    }
+    .col-activity {
+      width: 230px;
+      text-align: left;
+      padding-left: 12px;
+    }
+    .col-week {
+      width: 42px;
+    }
+    .filled {
+      background-color: #fed46c !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="title">3.4 Jadwal Kerja</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th rowspan="3" class="col-no">No.</th>
+        <th rowspan="3" style="width: 230px; text-align: center;">Jenis<br>Kegiatan</th>
+        <th colspan="16" style="padding: 6px;">Minggu Pelaksanaan</th>
+      </tr>
+      <tr>
+        <th colspan="4" style="padding: 6px;">Bulan Ke - 1</th>
+        <th colspan="4" style="padding: 6px;">Bulan Ke - 2</th>
+        <th colspan="4" style="padding: 6px;">Bulan Ke - 3</th>
+        <th colspan="4" style="padding: 6px;">Bulan Ke - 4</th>
+      </tr>
+      <tr>
+        <!-- Bulan 1 -->
+        <th class="col-week">1</th>
+        <th class="col-week">2</th>
+        <th class="col-week">3</th>
+        <th class="col-week">4</th>
+        <!-- Bulan 2 -->
+        <th class="col-week">1</th>
+        <th class="col-week">2</th>
+        <th class="col-week">3</th>
+        <th class="col-week">4</th>
+        <!-- Bulan 3 -->
+        <th class="col-week">1</th>
+        <th class="col-week">2</th>
+        <th class="col-week">3</th>
+        <th class="col-week">4</th>
+        <!-- Bulan 4 -->
+        <th class="col-week">1</th>
+        <th class="col-week">2</th>
+        <th class="col-week">3</th>
+        <th class="col-week">4</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 1. Perencanaan dan Analisa -->
+      <tr>
+        <td>1</td>
+        <td class="col-activity">Perencanaan dan Analisa</td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+
+      <!-- 2. Observasi -->
+      <tr>
+        <td>2</td>
+        <td class="col-activity">Observasi</td>
+        <td></td>
+        <td></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+
+      <!-- 3. Wawancara -->
+      <tr>
+        <td>3</td>
+        <td class="col-activity">Wawancara</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+
+      <!-- 4. Desain -->
+      <tr>
+        <td>4</td>
+        <td class="col-activity">Desain</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+
+      <!-- 5. Implementasi -->
+      <tr>
+        <td>5</td>
+        <td class="col-activity">Implementasi</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+
+      <!-- 6. Uji Coba -->
+      <tr>
+        <td>6</td>
+        <td class="col-activity">Uji Coba</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td></td>
+        <td></td>
+      </tr>
+
+      <!-- 7. Pemeliharaan -->
+      <tr>
+        <td>7</td>
+        <td class="col-activity">Pemeliharaan</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+        <td class="filled"></td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>

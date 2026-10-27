@@ -46,7 +46,7 @@ final class SalesTrend
             )->groupBy('month_num');
         }
 
-        $query->where('status', OrderStatus::VALIDATED)->orderBy('month_num');
+        $query->whereIn('status', [OrderStatus::UTANG, OrderStatus::LUNAS])->orderBy('month_num');
 
         if ($userId !== null) {
             $query->where('user_id', $userId);

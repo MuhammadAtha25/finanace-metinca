@@ -1,11 +1,11 @@
-import { Head, Link, usePage, router } from '@inertiajs/react';
-import { Undo2, Plus, Check, X } from 'lucide-react';
-import * as React from 'react';
-import { useCurrency } from '@/components/currency-context';
-import { useLanguage } from '@/components/language-context';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+    import { Head, Link, usePage, router } from '@inertiajs/react';
+    import { Undo2, Plus, Check, X } from 'lucide-react';
+    import * as React from 'react';
+    import { useCurrency } from '@/components/currency-context';
+    import { useLanguage } from '@/components/language-context';
+    import { Badge } from '@/components/ui/badge';
+    import { Button } from '@/components/ui/button';
+    import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface ReturnNote {
     id: number;

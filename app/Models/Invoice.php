@@ -17,6 +17,7 @@ class Invoice extends Model
         'tax_amount',
         'dp_amount',
         'total_amount',
+        'file_path',
         'currency',
         'exchange_rate',
         'due_date',

@@ -31,22 +31,27 @@ class SalesPortalController extends Controller
         $query = Order::with('customer');
 
         if ($user->isSales()) {
-            $query->where('user_id', $user->id);
+            $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('sales_rep', $user->name);
+            });
         }
 
         $orders = $query->orderBy('date_raised', 'desc')->get();
 
-        $totalSales = (float) $orders->where('status', OrderStatus::VALIDATED)->sum('total_amount');
+        $totalSales = (float) $orders->whereIn('status', [OrderStatus::UTANG, OrderStatus::LUNAS])->sum('total_amount');
+        $totalPaidSales = (float) $orders->where('status', OrderStatus::LUNAS)->sum('total_amount');
         $totalOrdersCount = $orders->count();
         $pendingCount = $user->isSales()
             ? $orders->where('status', OrderStatus::PENDING)->count()
             : $orders->where('status', OrderStatus::SUBMITTED)->count();
-        $validatedCount = $orders->where('status', OrderStatus::VALIDATED)->count();
+        $validatedCount = $orders->whereIn('status', [OrderStatus::UTANG, OrderStatus::LUNAS])->count();
 
         $returnsQuery = \App\Models\ReturnNote::query();
         if ($user->isSales()) {
             $returnsQuery->whereHas('order', function ($q) use ($user) {
-                $q->where('user_id', $user->id);
+                $q->where('user_id', $user->id)
+                  ->orWhere('sales_rep', $user->name);
             });
         }
         $approvedReturnsCount = $returnsQuery->where('status', 'Approved')->count();
@@ -62,6 +67,7 @@ class SalesPortalController extends Controller
         return Inertia::render('portal/dashboard', [
             'metrics' => [
                 'total_sales' => $totalSales,
+                'total_paid_sales' => $totalPaidSales,
                 'total_orders' => $totalOrdersCount,
                 'pending_orders' => $pendingCount,
                 'validated_orders' => $validatedCount,
@@ -81,24 +87,7 @@ class SalesPortalController extends Controller
 
     public function orders(Request $request)
     {
-        $query = Order::with('customer');
-
-        if ($request->user()->isSales()) {
-            $query->where('user_id', $request->user()->id);
-        }
-
-        $orders = $query->orderBy('date_raised', 'desc')->get()->map(fn ($o) => [
-            'id' => $o->id,
-            'date_raised' => $o->date_raised->format('M d, Y'),
-            'customer_name' => $o->customer->name,
-            'sales_rep' => $o->sales_rep,
-            'status' => $o->status,
-            'total_amount' => $o->total_amount,
-        ]);
-
-        return Inertia::render('portal/orders/index', [
-            'orders' => $orders,
-        ]);
+        return redirect()->route('sales.invoice_rekap');
     }
 
     public function createOrder()
@@ -221,7 +210,8 @@ class SalesPortalController extends Controller
             OrderStatus::PENDING => 'prospect',
             OrderStatus::SUBMITTED => 'proposal',
             OrderStatus::REJECTED => 'negotiation',
-            OrderStatus::VALIDATED => 'closed_won',
+            OrderStatus::UTANG => 'closed_won',
+            OrderStatus::LUNAS => 'closed_won',
         ];
 
         foreach ($orders as $order) {
@@ -242,6 +232,31 @@ class SalesPortalController extends Controller
 
         return Inertia::render('portal/pipeline', [
             'pipeline' => $buckets,
+        ]);
+    }
+
+    public function rekap()
+    {
+        $orders = Order::with('customer', 'validatedBy', 'invoice')
+            ->whereIn('status', [OrderStatus::UTANG, OrderStatus::LUNAS])
+            ->orderBy('validated_at', 'desc')
+            ->get()
+            ->map(fn ($o) => [
+                'id' => $o->id,
+                'date_raised' => $o->date_raised->format('M d, Y'),
+                'validated_at' => $o->validated_at ? $o->validated_at->format('M d, Y H:i') : null,
+                'validated_by_name' => $o->validatedBy ? $o->validatedBy->name : 'System',
+                'customer_name' => $o->customer->name,
+                'sales_rep' => $o->sales_rep,
+                'total_amount' => $o->total_amount,
+                'currency' => $o->currency,
+                'exchange_rate' => (float) $o->exchange_rate,
+                'has_invoice' => $o->invoice !== null,
+                'invoice_id' => $o->invoice ? 'INV-'.str_pad($o->invoice->id, 5, '0', STR_PAD_LEFT) : null,
+            ]);
+
+        return Inertia::render('portal/sales/rekap', [
+            'orders' => $orders,
         ]);
     }
 

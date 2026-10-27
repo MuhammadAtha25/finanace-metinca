@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3.4 Jadwal Kerja</title>
+  <style>
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      background-color: #f8fafc;
+      padding: 40px;
+      color: #111827;
+    }
+    .card {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h3 {
+      font-size: 16pt;
+      font-weight: bold;
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+    .instruction {
+      font-size: 11pt;
+      color: #4b5563;
+      margin-bottom: 20px;
+      font-family: Arial, sans-serif;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      text-align: center;
+      font-size: 11.5pt;
+    }
+    th, td {
+      border: 1px solid #000000;
+      padding: 6px 4px;
+      height: 26px;
+    }
+    th {
+      font-weight: normal;
+    }
+    .text-left {
+      text-align: left;
+      padding-left: 8px;
+    }
+    .bg-active {
+      background-color: #ffd269 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .btn-copy {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: Arial, sans-serif;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    .btn-copy:hover {
+      background-color: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <button class="btn-copy" onclick="copyTable()">📋 Salin Tabel untuk Word</button>
+  <span id="copyMsg" style="font-family: Arial, sans-serif; font-size: 13px; color: green; margin-left: 10px; display: none;">Tabel berhasil disalin! Tinggal Paste (Ctrl+V) di Microsoft Word.</span>
+
+  <div id="tableContainer">
+    <h3 style="font-family: 'Times New Roman', Times, serif; font-size: 14pt; font-weight: bold; margin-bottom: 10px;">3.4 Jadwal Kerja</h3>
+
+    <table style="border-collapse: collapse; width: 100%; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 12pt; border: 1px solid #000;">
+      <thead>
+        <tr>
+          <th rowspan="3" style="border: 1px solid #000; width: 5%; font-weight: normal;">No.</th>
+          <th rowspan="3" style="border: 1px solid #000; width: 25%; font-weight: normal;">Jenis<br>Kegiatan</th>
+          <th colspan="16" style="border: 1px solid #000; font-weight: normal;">Minggu Pelaksanaan</th>
+        </tr>
+        <tr>
+          <th colspan="4" style="border: 1px solid #000; font-weight: normal;">Bulan Ke - 1</th>
+          <th colspan="4" style="border: 1px solid #000; font-weight: normal;">Bulan Ke - 2</th>
+          <th colspan="4" style="border: 1px solid #000; font-weight: normal;">Bulan Ke - 3</th>
+          <th colspan="4" style="border: 1px solid #000; font-weight: normal;">Bulan Ke - 4</th>
+        </tr>
+        <tr>
+          <!-- Bulan 1 -->
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">1</th>
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">2</th>
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">3</th>
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">4</th>
+          <!-- Bulan 2 -->
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">1</th>
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">2</th>
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">3</th>
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">4</th>
+          <!-- Bulan 3 -->
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">1</th>
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">2</th>
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">3</th>
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">4</th>
+          <!-- Bulan 4 -->
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">1</th>
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">2</th>
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">3</th>
+          <th style="border: 1px solid #000; width: 4.3%; font-weight: normal;">4</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- 1. Perencanaan dan Analisa -->
+        <tr>
+          <td style="border: 1px solid #000;">1</td>
+          <td style="border: 1px solid #000; text-align: left; padding-left: 8px;">Perencanaan dan Analisa</td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+        </tr>
+
+        <!-- 2. Observasi -->
+        <tr>
+          <td style="border: 1px solid #000;">2</td>
+          <td style="border: 1px solid #000; text-align: left; padding-left: 8px;">Observasi</td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+        </tr>
+
+        <!-- 3. Wawancara -->
+        <tr>
+          <td style="border: 1px solid #000;">3</td>
+          <td style="border: 1px solid #000; text-align: left; padding-left: 8px;">Wawancara</td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+        </tr>
+
+        <!-- 4. Desain -->
+        <tr>
+          <td style="border: 1px solid #000;">4</td>
+          <td style="border: 1px solid #000; text-align: left; padding-left: 8px;">Desain</td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+        </tr>
+
+        <!-- 5. Implementasi -->
+        <tr>
+          <td style="border: 1px solid #000;">5</td>
+          <td style="border: 1px solid #000; text-align: left; padding-left: 8px;">Implementasi</td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+        </tr>
+
+        <!-- 6. Uji Coba -->
+        <tr>
+          <td style="border: 1px solid #000;">6</td>
+          <td style="border: 1px solid #000; text-align: left; padding-left: 8px;">Uji Coba</td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+        </tr>
+
+        <!-- 7. Pemeliharaan -->
+        <tr>
+          <td style="border: 1px solid #000;">7</td>
+          <td style="border: 1px solid #000; text-align: left; padding-left: 8px;">Pemeliharaan</td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+          <td style="border: 1px solid #000; background-color: #ffd269;"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function copyTable() {
+  const container = document.getElementById('tableContainer');
+  const range = document.createRange();
+  range.selectNode(container);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+  
+  try {
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+    const msg = document.getElementById('copyMsg');
+    msg.style.display = 'inline';
+    setTimeout(() => { msg.style.display = 'none'; }, 4000);
+  } catch (err) {
+    alert('Silakan blok tabel lalu tekan Ctrl + C secara manual.');
+  }
+}
+</script>
+
+</body>
+</html>

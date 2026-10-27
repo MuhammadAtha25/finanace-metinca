@@ -158,6 +158,9 @@ class SalesPortalSeeder extends Seeder
             ],
         ];
 
+        $staffSalesUser = \App\Models\User::where('role', 'staff_sales')->first();
+        $salesUserId = $staffSalesUser ? $staffSalesUser->id : 2;
+
         foreach ($ordersData as $oData) {
             if (Order::where('id', $oData['id'])->exists()) {
                 continue;
@@ -171,6 +174,7 @@ class SalesPortalSeeder extends Seeder
 
             $order = Order::create([
                 'id' => $oData['id'],
+                'user_id' => $salesUserId,
                 'date_raised' => Carbon::parse($oData['date']),
                 'customer_id' => $customerModels[$oData['customer_idx']]->id,
                 'sales_rep' => $oData['sales_rep'],
@@ -190,6 +194,23 @@ class SalesPortalSeeder extends Seeder
                     'price' => $p->price,
                 ]);
             }
+
+            $taxPercent = 11;
+            $taxAmount = round($totalAmount - $subtotal, 2);
+            \App\Models\Invoice::create([
+                'order_id' => $order->id,
+                'invoice_type' => 'domestik',
+                'subtotal' => round($subtotal, 2),
+                'tax_percent' => $taxPercent,
+                'tax_amount' => $taxAmount,
+                'dp_amount' => 0,
+                'total_amount' => round($totalAmount, 2),
+                'currency' => 'IDR',
+                'exchange_rate' => 1,
+                'status' => $order->status === 'Validated' ? 'utang' : ($order->status === 'Submitted' ? 'Submitted' : 'Pending'),
+                'created_at' => Carbon::parse($oData['date']),
+                'updated_at' => Carbon::parse($oData['date']),
+            ]);
         }
     }
 }

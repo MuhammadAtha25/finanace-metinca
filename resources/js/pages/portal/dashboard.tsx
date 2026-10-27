@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 interface MetricProps {
     total_sales: number;
+    total_paid_sales?: number;
     total_orders: number;
     pending_orders: number;
     validated_orders: number;
@@ -24,7 +25,7 @@ interface OrderItem {
     date_raised: string;
     customer_name: string;
     sales_rep: string;
-    status: 'Pending' | 'Submitted' | 'Validated' | 'Rejected';
+    status: 'Pending' | 'Submitted' | 'utang' | 'lunas' | 'Rejected';
     total_amount: number;
 }
 
@@ -111,7 +112,7 @@ export default function Dashboard({ metrics, chart_data, recent_orders }: Dashbo
 
                     <Card className="border border-sidebar-border/75">
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
-                            <CardTitle className="text-sm font-medium">{t('Pesanan Tervalidasi', 'Validated Orders')}</CardTitle>
+                            <CardTitle className="text-sm font-medium">{t('Pesanan Berjalan / Utang', 'Active Debt / Paid')}</CardTitle>
                             <CheckCircle2 className="text-green-500 size-4" />
                         </CardHeader>
                         <CardContent>
@@ -136,7 +137,28 @@ export default function Dashboard({ metrics, chart_data, recent_orders }: Dashbo
                     </Card>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+                {role === 'manager' && metrics.total_paid_sales !== undefined && (
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2 mt-2">
+                        <Card className="border border-green-200 bg-green-50 dark:bg-green-950/20">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-green-700 dark:text-green-400">{t('Total Penjualan Lunas', 'Total Paid Sales')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-green-700 dark:text-green-400">{formatPrice(metrics.total_paid_sales)}</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="border border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-400">{t('Total Penjualan Utang', 'Total Unpaid/Debt Sales')}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold text-blue-700 dark:text-blue-400">{formatPrice(metrics.total_sales - metrics.total_paid_sales)}</div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
+
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7 mt-2">
                     {/* Sales Performance Chart */}
                     <Card className="lg:col-span-4 border border-sidebar-border/75">
                         <CardHeader>
@@ -184,7 +206,11 @@ export default function Dashboard({ metrics, chart_data, recent_orders }: Dashbo
                                 <CardDescription>{t('Daftar transaksi pesanan masuk terbaru', 'Latest orders from order entry portal')}</CardDescription>
                             </div>
                             <Button variant="outline" size="sm" asChild>
-                                <Link href="/orders">
+                                <Link href={
+                                    role === 'staff_accounting' ? '/accounting/inbox' :
+                                    role === 'manager' ? '/manager/sales-recap' :
+                                    '/sales/invoice-rekap'
+                                }>
                                     {t('Lihat Semua', 'View All')} <ArrowUpRight className="size-4 ml-1" />
                                 </Link>
                             </Button>
@@ -199,16 +225,22 @@ export default function Dashboard({ metrics, chart_data, recent_orders }: Dashbo
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <Badge variant={
-                                                order.status === 'Validated' ? 'default' :
+                                                order.status === 'lunas' ? 'default' :
+                                                order.status === 'utang' ? 'destructive' :
                                                 order.status === 'Submitted' ? 'outline' :
                                                 order.status === 'Pending' ? 'secondary' : 'destructive'
                                             } className={
                                                 order.status === 'Submitted' 
                                                     ? 'border-blue-500 text-blue-500 bg-blue-50 dark:bg-blue-950/20' 
+                                                    : order.status === 'utang'
+                                                    ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400'
+                                                    : order.status === 'lunas'
+                                                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-400'
                                                     : ''
                                             }>
                                                 {t(
-                                                    order.status === 'Validated' ? 'Disetujui' : 
+                                                    order.status === 'lunas' ? 'Lunas' : 
+                                                    order.status === 'utang' ? 'Utang' : 
                                                     order.status === 'Submitted' ? 'Dikirim' : 
                                                     order.status === 'Pending' ? 'Draft' : 'Ditolak', 
                                                     order.status
