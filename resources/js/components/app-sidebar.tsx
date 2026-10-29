@@ -1,6 +1,17 @@
-import { Link } from '@inertiajs/react';
-import { usePage } from '@inertiajs/react';
-import { LayoutGrid, ShoppingCart, BarChart3, GitFork, Package, Users, Globe, Languages, ClipboardList, FileText, Box, Undo2, Plus } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import {
+    LayoutGrid,
+    ShoppingCart,
+    Users,
+    Globe,
+    Languages,
+    ClipboardList,
+    FileText,
+    Box,
+    Undo2,
+    Plus,
+    Scale,
+} from 'lucide-react';
 import * as React from 'react';
 import AppLogo from '@/components/app-logo';
 import { useCurrency } from '@/components/currency-context';
@@ -20,13 +31,12 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 
-
 interface RawNavItem {
     titleId: string;
     titleEn: string;
     href: string;
     icon: typeof LayoutGrid;
-    badge?: number;
+    badgeKey?: 'accounting_inbox' | 'manager_reports' | 'purchase_orders';
     roles?: string[];
 }
 
@@ -38,11 +48,19 @@ const mainNavItemsRaw: RawNavItem[] = [
         icon: LayoutGrid,
     },
     {
-        titleId: 'Inbox Laporan',
-        titleEn: 'Report Inbox',
+        titleId: 'Inbox Laporan Detail',
+        titleEn: 'Detailed Report Inbox',
         href: '/manager/reports',
         icon: ClipboardList,
+        badgeKey: 'manager_reports',
         roles: ['manager'],
+    },
+    {
+        titleId: 'Laporan Neraca',
+        titleEn: 'Balance Sheet (Neraca)',
+        href: '/manager/neraca',
+        icon: Scale,
+        roles: ['manager', 'staff_accounting'],
     },
     {
         titleId: 'Rekap Penjualan Valid',
@@ -56,7 +74,16 @@ const mainNavItemsRaw: RawNavItem[] = [
         titleEn: 'Validation Inbox',
         href: '/accounting/inbox',
         icon: ClipboardList,
+        badgeKey: 'accounting_inbox',
         roles: ['staff_accounting'],
+    },
+    {
+        titleId: 'Purchase Order (PO)',
+        titleEn: 'Purchase Orders (PO)',
+        href: '/purchase-orders',
+        icon: ShoppingCart,
+        badgeKey: 'purchase_orders',
+        roles: ['staff_sales', 'staff_accounting', 'manager'],
     },
     {
         titleId: 'Riwayat Invoice',
@@ -66,11 +93,11 @@ const mainNavItemsRaw: RawNavItem[] = [
         roles: ['staff_sales'],
     },
     {
-        titleId: 'Rekapan per PT',
-        titleEn: 'Customer Statement',
+        titleId: 'Rekapan Penjualan per Customer',
+        titleEn: 'Sales Recap per Customer',
         href: '/reports/customer-recap',
         icon: FileText,
-        roles: ['staff_accounting'],
+        roles: ['staff_accounting', 'manager'],
     },
     {
         titleId: 'Input Invoice Baru',
@@ -87,7 +114,7 @@ const mainNavItemsRaw: RawNavItem[] = [
         roles: ['staff_sales', 'staff_accounting'],
     },
     {
-        titleId: 'Pelanggan',
+        titleId: 'Pelanggan (Customer)',
         titleEn: 'Customers',
         href: '/customers',
         icon: Users,
@@ -107,21 +134,27 @@ const footerNavItems: NavItem[] = [];
 export function AppSidebar() {
     const { currency, setCurrency } = useCurrency();
     const { language, setLanguage, t } = useLanguage();
-    const { auth } = usePage().props as any;
+    const { auth, sidebar_badges } = usePage().props as any;
 
     const mainNavItems = React.useMemo<NavItem[]>(() => {
         const user = auth?.user;
         const role = user?.role || 'staff_sales';
 
         return mainNavItemsRaw
-            .filter(item => !item.roles || item.roles.includes(role))
-            .map(item => ({
-                title: t(item.titleId, item.titleEn),
-                href: item.href,
-                icon: item.icon,
-                badge: item.badge
-            }));
-    }, [t, auth]);
+            .filter((item) => !item.roles || item.roles.includes(role))
+            .map((item) => {
+                const rawBadge = item.badgeKey
+                    ? Number(sidebar_badges?.[item.badgeKey] ?? 0)
+                    : 0;
+
+                return {
+                    title: t(item.titleId, item.titleEn),
+                    href: item.href,
+                    icon: item.icon,
+                    badge: rawBadge > 0 ? rawBadge : undefined,
+                };
+            });
+    }, [t, auth, sidebar_badges]);
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -151,8 +184,8 @@ export function AppSidebar() {
                         <button
                             onClick={() => setLanguage('id')}
                             className={`flex-1 py-1 rounded-sm text-center font-medium transition-all ${
-                                language === 'id' 
-                                    ? 'bg-background text-foreground shadow-sm' 
+                                language === 'id'
+                                    ? 'bg-background text-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'
                             }`}
                         >
@@ -161,8 +194,8 @@ export function AppSidebar() {
                         <button
                             onClick={() => setLanguage('en')}
                             className={`flex-1 py-1 rounded-sm text-center font-medium transition-all ${
-                                language === 'en' 
-                                    ? 'bg-background text-foreground shadow-sm' 
+                                language === 'en'
+                                    ? 'bg-background text-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'
                             }`}
                         >
@@ -180,8 +213,8 @@ export function AppSidebar() {
                         <button
                             onClick={() => setCurrency('USD')}
                             className={`flex-1 py-1 rounded-sm text-center font-medium transition-all ${
-                                currency === 'USD' 
-                                    ? 'bg-background text-foreground shadow-sm' 
+                                currency === 'USD'
+                                    ? 'bg-background text-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'
                             }`}
                         >
@@ -190,8 +223,8 @@ export function AppSidebar() {
                         <button
                             onClick={() => setCurrency('EUR')}
                             className={`flex-1 py-1 rounded-sm text-center font-medium transition-all ${
-                                currency === 'EUR' 
-                                    ? 'bg-background text-foreground shadow-sm' 
+                                currency === 'EUR'
+                                    ? 'bg-background text-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'
                             }`}
                         >
@@ -200,8 +233,8 @@ export function AppSidebar() {
                         <button
                             onClick={() => setCurrency('IDR')}
                             className={`flex-1 py-1 rounded-sm text-center font-medium transition-all ${
-                                currency === 'IDR' 
-                                    ? 'bg-background text-foreground shadow-sm' 
+                                currency === 'IDR'
+                                    ? 'bg-background text-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'
                             }`}
                         >
@@ -209,7 +242,9 @@ export function AppSidebar() {
                         </button>
                     </div>
                 </div>
-                {footerNavItems.length > 0 && <NavFooter items={footerNavItems} className="mt-auto" />}
+                {footerNavItems.length > 0 && (
+                    <NavFooter items={footerNavItems} className="mt-auto" />
+                )}
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

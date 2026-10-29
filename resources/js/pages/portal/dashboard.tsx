@@ -48,14 +48,14 @@ export default function Dashboard({ metrics, chart_data, recent_orders }: Dashbo
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">
-                            {role === 'staff_sales' ? t('Dasbor Penjualan', 'Sales Representative Dashboard') :
-                             role === 'staff_accounting' ? t('Dasbor Akuntansi', 'Accounting Dashboard') :
-                             t('Dasbor Manajer', 'Manager Dashboard')}
+                            {role === 'staff_sales' ? t('Dasbor Penjualan (Staff Sales)', 'Sales Representative Dashboard') :
+                             role === 'staff_accounting' ? t('Dasbor Staff Accounting', 'Accounting Staff Dashboard') :
+                             t('Dasbor Manager Accounting', 'Accounting Manager Dashboard')}
                         </h1>
                         <p className="text-muted-foreground text-sm font-medium">
                             {role === 'staff_sales' ? t('Monitor pesanan Anda dan status persetujuan transaksi.', 'Monitor your orders and transaction approval status.') :
-                             role === 'staff_accounting' ? t('Validasi pesanan masuk dan awasi rekap penjualan.', 'Validate incoming orders and oversee sales recaps.') :
-                             t('Monitor performa keuangan perusahaan, grafik analitik, dan klasemen perwakilan.', 'Monitor company financial performance, analytical graphs, and standings.')}
+                             role === 'staff_accounting' ? t('Validasi pesanan masuk, kelola Purchase Order, dan awasi rekap penjualan.', 'Validate incoming orders, manage Purchase Orders, and oversee sales recaps.') :
+                             t('Tinjau laporan detail penjualan, validasi Purchase Order, dan pantau Laporan Neraca perusahaan.', 'Review detailed sales reports, validate Purchase Orders, and monitor the company Balance Sheet.')}
                         </p>
                     </div>
                 </div>
