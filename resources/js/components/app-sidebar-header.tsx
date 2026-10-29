@@ -1,13 +1,15 @@
 import { router, usePage } from '@inertiajs/react';
-import { Bell, CheckCheck, ExternalLink } from 'lucide-react';
+import { Bell, Check, CheckCheck, ExternalLink, Monitor, Moon, Sun } from 'lucide-react';
 import * as React from 'react';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { useLanguage } from '@/components/language-context';
+import { useAppearance } from '@/hooks/use-appearance';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
@@ -32,6 +34,7 @@ export function AppSidebarHeader({
     breadcrumbs?: BreadcrumbItemType[];
 }) {
     const { t } = useLanguage();
+    const { appearance, resolvedAppearance, updateAppearance } = useAppearance();
     const { auth, notifications } = usePage().props as any;
     const user = auth?.user;
     const role = user?.role || 'staff_sales';
@@ -65,13 +68,64 @@ export function AppSidebarHeader({
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
                 <Badge
                     variant="outline"
                     className="hidden sm:inline-flex border-blue-200 bg-blue-50/70 text-blue-700 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-300 font-semibold text-xs"
                 >
                     {roleLabel}
                 </Badge>
+
+                {/* Theme Selector Dropdown */}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="relative size-9 rounded-full cursor-pointer hover:bg-muted/80"
+                            aria-label={t('Pilihan Tema', 'Theme Options')}
+                            title={t('Pilihan Tema', 'Theme Options')}
+                        >
+                            {resolvedAppearance === 'dark' ? (
+                                <Moon className="size-4.5 text-muted-foreground" />
+                            ) : (
+                                <Sun className="size-4.5 text-muted-foreground" />
+                            )}
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuItem
+                            onClick={() => updateAppearance('light')}
+                            className="flex items-center gap-2 text-xs font-medium cursor-pointer"
+                        >
+                            <Sun className="size-4 text-amber-500" />
+                            <span>{t('Terang (Light)', 'Light')}</span>
+                            {appearance === 'light' && (
+                                <Check className="ml-auto size-3.5 text-blue-600" />
+                            )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => updateAppearance('dark')}
+                            className="flex items-center gap-2 text-xs font-medium cursor-pointer"
+                        >
+                            <Moon className="size-4 text-blue-400" />
+                            <span>{t('Gelap (Dark)', 'Dark')}</span>
+                            {appearance === 'dark' && (
+                                <Check className="ml-auto size-3.5 text-blue-600" />
+                            )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => updateAppearance('system')}
+                            className="flex items-center gap-2 text-xs font-medium cursor-pointer"
+                        >
+                            <Monitor className="size-4 text-slate-500" />
+                            <span>{t('Sistem (System)', 'System')}</span>
+                            {appearance === 'system' && (
+                                <Check className="ml-auto size-3.5 text-blue-600" />
+                            )}
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

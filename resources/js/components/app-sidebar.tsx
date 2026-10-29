@@ -11,11 +11,15 @@ import {
     Undo2,
     Plus,
     Scale,
+    Sun,
+    Moon,
+    Monitor,
 } from 'lucide-react';
 import * as React from 'react';
 import AppLogo from '@/components/app-logo';
 import { useCurrency } from '@/components/currency-context';
 import { useLanguage } from '@/components/language-context';
+import { useAppearance } from '@/hooks/use-appearance';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -134,6 +138,7 @@ const footerNavItems: NavItem[] = [];
 export function AppSidebar() {
     const { currency, setCurrency } = useCurrency();
     const { language, setLanguage, t } = useLanguage();
+    const { appearance, updateAppearance } = useAppearance();
     const { auth, sidebar_badges } = usePage().props as any;
 
     const mainNavItems = React.useMemo<NavItem[]>(() => {
@@ -175,6 +180,54 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
+                {/* Theme Selector */}
+                <div className="px-3 py-2 flex flex-col gap-2 border-b border-sidebar-border/40">
+                    <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                        <Sun className="size-3" /> {t('Tema Tampilan', 'Theme')}
+                    </span>
+                    <div className="flex bg-muted p-0.5 rounded-md text-xs">
+                        <button
+                            type="button"
+                            onClick={() => updateAppearance('light')}
+                            className={`flex-1 py-1 rounded-sm text-center font-medium flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                                appearance === 'light'
+                                    ? 'bg-background text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                            title={t('Tema Terang', 'Light Theme')}
+                        >
+                            <Sun className="size-3" />
+                            <span>{t('Terang', 'Light')}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => updateAppearance('dark')}
+                            className={`flex-1 py-1 rounded-sm text-center font-medium flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                                appearance === 'dark'
+                                    ? 'bg-background text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                            title={t('Tema Gelap', 'Dark Theme')}
+                        >
+                            <Moon className="size-3" />
+                            <span>{t('Gelap', 'Dark')}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => updateAppearance('system')}
+                            className={`flex-1 py-1 rounded-sm text-center font-medium flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                                appearance === 'system'
+                                    ? 'bg-background text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                            title={t('Tema Sistem', 'System Theme')}
+                        >
+                            <Monitor className="size-3" />
+                            <span>{t('Sistem', 'System')}</span>
+                        </button>
+                    </div>
+                </div>
+
                 {/* Language Selector */}
                 <div className="px-3 py-2 flex flex-col gap-2 border-b border-sidebar-border/40">
                     <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">

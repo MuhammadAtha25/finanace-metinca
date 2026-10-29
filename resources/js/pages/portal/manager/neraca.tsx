@@ -28,7 +28,6 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useLanguage } from '@/components/language-context';
-import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
 interface AccountLine {
@@ -211,7 +210,7 @@ export default function ManagerNeraca({
     const pendingSubmission = neraca_submissions.find((s) => s.status === 'submitted');
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <>
             <Head title="Laporan Neraca (Balance Sheet)" />
 
             <div className="flex h-full flex-1 flex-col gap-6 bg-slate-50/40 p-6 dark:bg-transparent">
@@ -836,6 +835,15 @@ export default function ManagerNeraca({
                     </CardContent>
                 </Card>
             </div>
-        </AppLayout>
+        </>
     );
 }
+
+ManagerNeraca.layout = {
+    breadcrumbs: [
+        {
+            title: 'Laporan Neraca (Balance Sheet)',
+            href: '/manager/neraca',
+        },
+    ],
+};

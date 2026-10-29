@@ -45,7 +45,6 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useLanguage } from '@/components/language-context';
-import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
 interface PoItemRow {
@@ -373,7 +372,7 @@ export default function PurchaseOrdersIndex({
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <>
             <Head title="Purchase Order (PO) — Procurement" />
 
             <div className="flex h-full flex-1 flex-col gap-6 bg-slate-50/40 p-6 dark:bg-transparent">
@@ -1149,6 +1148,15 @@ export default function PurchaseOrdersIndex({
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </AppLayout>
+        </>
     );
 }
+
+PurchaseOrdersIndex.layout = {
+    breadcrumbs: [
+        {
+            title: 'Purchase Order (PO)',
+            href: '/purchase-orders',
+        },
+    ],
+};
