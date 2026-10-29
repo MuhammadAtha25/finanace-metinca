@@ -44,6 +44,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useCurrency } from '@/components/currency-context';
 import { useLanguage } from '@/components/language-context';
 import type { BreadcrumbItem } from '@/types';
 
@@ -116,6 +117,7 @@ export default function PurchaseOrdersIndex({
     plants = [],
     products = [],
 }: Props) {
+    const { formatPrice } = useCurrency();
     const { language } = useLanguage();
     const { props } = usePage<{
         auth: { user: { id: number; name: string; role: string } };
@@ -170,12 +172,7 @@ export default function PurchaseOrdersIndex({
         ],
     });
 
-    const formatCurrency = (val: number) =>
-        new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-        }).format(Number(val || 0));
+    const formatCurrency = (val: number) => formatPrice(Number(val || 0));
 
     // Summary KPIs matching ADI's Procurement.tsx
     const kpis = useMemo(() => {
@@ -375,7 +372,7 @@ export default function PurchaseOrdersIndex({
         <>
             <Head title="Purchase Order (PO) — Procurement" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 bg-slate-50/40 p-6 dark:bg-transparent">
+            <div className="flex h-full min-w-0 flex-1 flex-col gap-4 bg-slate-50/40 p-4 sm:gap-6 sm:p-6 dark:bg-transparent">
                 {/* Flash Message */}
                 {props.flash?.success && (
                     <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 shadow-xs">
@@ -421,7 +418,7 @@ export default function PurchaseOrdersIndex({
                 </div>
 
                 {/* 4 Status Cards (Matching ADI's Procurement.tsx) + Financial Summary */}
-                <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-6 sm:gap-4">
                     <Card
                         onClick={() => setStatusFilter(statusFilter === 'Draft' ? 'ALL' : 'Draft')}
                         className={`cursor-pointer border-slate-200 shadow-xs transition hover:border-slate-400 ${
@@ -560,7 +557,7 @@ export default function PurchaseOrdersIndex({
                                 </div>
 
                                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                    <SelectTrigger className="w-[160px]">
+                                    <SelectTrigger className="w-full sm:w-[160px]">
                                         <SelectValue placeholder="All Status" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -577,7 +574,7 @@ export default function PurchaseOrdersIndex({
                     </CardHeader>
 
                     <CardContent className="p-0">
-                        <Table>
+                        <Table className="min-w-[1000px]">
                             <TableHeader className="bg-slate-50/80 dark:bg-slate-900/40">
                                 <TableRow>
                                     <TableHead>PO Number</TableHead>

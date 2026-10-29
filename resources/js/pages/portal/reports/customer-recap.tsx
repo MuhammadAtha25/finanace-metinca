@@ -51,7 +51,7 @@ export default function CustomerRecap({ customers, selectedCustomerId, invoices 
     return (
         <>
             <Head title={t('Rekapan Penjualan per Customer', 'Sales Recap per Customer')} />
-            <div className="flex flex-1 flex-col gap-6 p-6">
+            <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 sm:gap-6 sm:p-6">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">{t('Rekapan Penjualan per Customer', 'Sales Recap per Customer')}</h1>
                     <p className="text-muted-foreground text-sm">

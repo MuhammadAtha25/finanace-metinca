@@ -27,6 +27,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useCurrency } from '@/components/currency-context';
 import { useLanguage } from '@/components/language-context';
 import type { BreadcrumbItem } from '@/types';
 
@@ -122,6 +123,7 @@ export default function ManagerNeraca({
     drilldown,
     neraca_submissions = [],
 }: Props) {
+    const { formatPrice } = useCurrency();
     const { language } = useLanguage();
     const { props } = usePage<{
         auth: { user: { id: number; name: string; role: string } };
@@ -140,12 +142,7 @@ export default function ManagerNeraca({
         { title: 'Laporan Neraca (Balance Sheet)', href: '/manager/neraca' },
     ];
 
-    const formatCurrency = (val: number) =>
-        new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-            minimumFractionDigits: 0,
-        }).format(Number(val || 0));
+    const formatCurrency = (val: number) => formatPrice(Number(val || 0));
 
     const handlePeriodChange = (newPeriod: string) => {
         setSelectedPeriod(newPeriod);
@@ -213,7 +210,7 @@ export default function ManagerNeraca({
         <>
             <Head title="Laporan Neraca (Balance Sheet)" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 bg-slate-50/40 p-6 dark:bg-transparent">
+            <div className="flex h-full min-w-0 flex-1 flex-col gap-4 bg-slate-50/40 p-4 sm:gap-6 sm:p-6 dark:bg-transparent">
                 {props.flash?.success && (
                     <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 shadow-xs print:hidden">
                         <CheckCircle2 className="size-4 shrink-0 text-emerald-600" />
@@ -300,7 +297,7 @@ export default function ManagerNeraca({
                 </div>
 
                 {/* Balance Check Banner & Ratios */}
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 sm:gap-4">
                     <Card
                         className={`border shadow-xs ${
                             neraca.is_balanced
@@ -378,7 +375,7 @@ export default function ManagerNeraca({
                 </div>
 
                 {/* Two-Column Skontro Balance Sheet (AKTIVA on Left, PASIVA on Right) */}
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                     {/* LEFT COLUMN: AKTIVA (ASSETS) */}
                     <Card className="flex flex-col justify-between border-slate-200 shadow-xs">
                         <div>

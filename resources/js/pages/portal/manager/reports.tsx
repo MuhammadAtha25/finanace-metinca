@@ -481,7 +481,7 @@ export default function ReportsInbox({ reports }: ReportsProps) {
                     'Detailed Report Inbox - Manager Accounting',
                 )}
             />
-            <div className="flex flex-1 flex-col gap-6 p-6">
+            <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 sm:gap-6 sm:p-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">
@@ -857,7 +857,7 @@ export default function ReportsInbox({ reports }: ReportsProps) {
 
                             {/* 8 Detailed Financial Breakdown Cards */}
                             <CardContent className="pt-6">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 sm:gap-4">
                                     <div className="p-3.5 rounded-lg border bg-muted/20">
                                         <div className="text-[11px] font-semibold uppercase text-muted-foreground">
                                             {t(

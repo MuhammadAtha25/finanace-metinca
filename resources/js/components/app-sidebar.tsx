@@ -181,7 +181,7 @@ export function AppSidebar() {
 
             <SidebarFooter>
                 {/* Theme Selector */}
-                <div className="px-3 py-2 flex flex-col gap-2 border-b border-sidebar-border/40">
+                <div className="group-data-[collapsible=icon]:hidden px-3 py-2 flex flex-col gap-2 border-b border-sidebar-border/40">
                     <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
                         <Sun className="size-3" /> {t('Tema Tampilan', 'Theme')}
                     </span>
@@ -229,7 +229,7 @@ export function AppSidebar() {
                 </div>
 
                 {/* Language Selector */}
-                <div className="px-3 py-2 flex flex-col gap-2 border-b border-sidebar-border/40">
+                <div className="group-data-[collapsible=icon]:hidden px-3 py-2 flex flex-col gap-2 border-b border-sidebar-border/40">
                     <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
                         <Languages className="size-3" /> {t('Bahasa', 'Language')}
                     </span>
@@ -258,7 +258,7 @@ export function AppSidebar() {
                 </div>
 
                 {/* Currency Selector */}
-                <div className="px-3 py-2 flex flex-col gap-2 border-b border-sidebar-border/40 mb-2">
+                <div className="group-data-[collapsible=icon]:hidden px-3 py-2 flex flex-col gap-2 border-b border-sidebar-border/40 mb-2">
                     <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
                         <Globe className="size-3" /> {t('Mata Uang', 'Currency')}
                     </span>

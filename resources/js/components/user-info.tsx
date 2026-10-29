@@ -36,7 +36,7 @@ export function UserInfo({
                     {getInitials(displayName)}
                 </AvatarFallback>
             </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
+            <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                 <span className="truncate font-semibold">{displayName}</span>
                 <span className="truncate text-[11px] font-medium text-blue-600 dark:text-blue-400">
                     {roleLabel}
