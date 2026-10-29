@@ -69,11 +69,35 @@ class ReturnController extends Controller
                     'return_note_id' => $returnNote->id,
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
-                    'price' => $item['price'],
+                    'price_per_item' => $item['price'],
                 ]);
             }
         });
 
         return redirect()->route('returns.index')->with('success', 'Return note created successfully.');
+    }
+
+    public function approve($id)
+    {
+        $returnNote = ReturnNote::findOrFail($id);
+
+        DB::transaction(function () use ($returnNote) {
+            $returnNote->update(['status' => 'Approved']);
+            
+            $order = $returnNote->order;
+            if ($order) {
+                $order->total_amount = max(0, $order->total_amount - $returnNote->total_amount);
+                $order->save();
+            }
+        });
+
+        return redirect()->back()->with('success', 'Return note approved and order total adjusted.');
+    }
+
+    public function reject($id)
+    {
+        $returnNote = ReturnNote::findOrFail($id);
+        $returnNote->update(['status' => 'Rejected']);
+        return redirect()->back()->with('success', 'Return note rejected.');
     }
 }

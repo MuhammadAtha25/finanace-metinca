@@ -37,11 +37,12 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
             'unit' => 'required|string|max:50',
-            'stock' => 'required|integer|min:0',
-            'min' => 'required|integer|min:0',
-            'location' => 'nullable|string|max:255',
             'price' => 'required|numeric|min:0',
         ]);
+
+        $validated['stock'] = 0;
+        $validated['min'] = 0;
+        $validated['location'] = '-';
 
         Product::create($validated);
 
@@ -75,9 +76,6 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
             'unit' => 'required|string|max:50',
-            'stock' => 'required|integer|min:0',
-            'min' => 'required|integer|min:0',
-            'location' => 'nullable|string|max:255',
             'price' => 'required|numeric|min:0',
         ]);
 

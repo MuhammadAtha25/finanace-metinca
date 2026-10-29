@@ -17,9 +17,6 @@ export default function CreateProduct() {
         name: '',
         category: '',
         unit: 'Pcs',
-        stock: 0,
-        min: 5,
-        location: '',
         price: 0,
     });
 
@@ -35,14 +32,13 @@ export default function CreateProduct() {
     return (
         <>
             <Head title={t('Tambah Produk', 'Add Product')} />
-            <div className="flex flex-1 flex-col gap-6 p-6 max-w-5xl mx-auto w-full">
+            <div className="flex flex-1 flex-col gap-6 p-6 max-w-3xl mx-auto w-full">
                 <div className="flex flex-col gap-2">
                     <h1 className="text-3xl font-bold tracking-tight">{t('Tambah Produk Baru', 'Add New Product')}</h1>
-                    <p className="text-muted-foreground">{t('Masukkan informasi detail produk untuk ditambahkan ke inventaris.', 'Enter product details to add to the inventory.')}</p>
+                    <p className="text-muted-foreground">{t('Masukkan informasi detail produk.', 'Enter product details.')}</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Basic Info Card */}
                         <Card className="shadow-sm border-white/20 bg-card/80 backdrop-blur-xl">
                             <CardHeader>
@@ -80,10 +76,12 @@ export default function CreateProduct() {
                                                 <SelectValue placeholder={t('Pilih Kategori', 'Select Category')} />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="SaaS">SaaS</SelectItem>
-                                                <SelectItem value="Cloud">Cloud</SelectItem>
-                                                <SelectItem value="Hardware">Hardware</SelectItem>
-                                                <SelectItem value="Services">Services</SelectItem>
+                                                <SelectItem value="Office Supplies">Office Supplies</SelectItem>
+                                                <SelectItem value="Electronics">Electronics</SelectItem>
+                                                <SelectItem value="Furniture">Furniture</SelectItem>
+                                                <SelectItem value="Besi & Baja">Besi & Baja</SelectItem>
+                                                <SelectItem value="Logam & Metal">Logam & Metal</SelectItem>
+                                                <SelectItem value="Lainnya">Lainnya</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <InputError message={errors.category} />
@@ -133,59 +131,15 @@ export default function CreateProduct() {
                                 </div>
                             </CardContent>
                         </Card>
-                    </div>
-
-                    <div className="lg:col-span-1 space-y-6">
-                        {/* Inventory Card */}
-                        <Card className="shadow-sm border-white/20 bg-card/80 backdrop-blur-xl">
-                            <CardHeader>
-                                <CardTitle>{t('Inventaris', 'Inventory')}</CardTitle>
-                                <CardDescription>{t('Atur stok dan lokasi.', 'Set stock and storage.')}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="stock">{t('Stok Awal', 'Initial Stock')}</Label>
-                                    <Input
-                                        id="stock"
-                                        type="number"
-                                        value={data.stock}
-                                        onChange={(e) => setData('stock', Number(e.target.value))}
-                                    />
-                                    <InputError message={errors.stock} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="min">{t('Stok Minimum', 'Min Stock Threshold')}</Label>
-                                    <Input
-                                        id="min"
-                                        type="number"
-                                        value={data.min}
-                                        onChange={(e) => setData('min', Number(e.target.value))}
-                                    />
-                                    <InputError message={errors.min} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="location">{t('Lokasi', 'Location')}</Label>
-                                    <Input
-                                        id="location"
-                                        value={data.location}
-                                        onChange={(e) => setData('location', e.target.value)}
-                                        placeholder={t('Contoh: Rak A-3', 'e.g. Shelf A-3')}
-                                    />
-                                    <InputError message={errors.location} />
-                                </div>
-                            </CardContent>
-                        </Card>
-
                         {/* Actions */}
-                        <div className="flex flex-col gap-3">
-                            <Button type="submit" size="lg" className="w-full shadow-md" disabled={processing}>
-                                {t('Simpan Produk', 'Save Product')}
-                            </Button>
-                            <Button type="button" size="lg" variant="outline" className="w-full" onClick={() => window.history.back()}>
+                        <div className="flex justify-end gap-3 pt-4">
+                            <Button type="button" variant="outline" onClick={() => window.history.back()}>
                                 {t('Batal', 'Cancel')}
                             </Button>
+                            <Button type="submit" disabled={processing}>
+                                {t('Simpan Produk', 'Save Product')}
+                            </Button>
                         </div>
-                    </div>
                 </form>
             </div>
         </>

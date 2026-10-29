@@ -1,11 +1,11 @@
-import { Head, Link, usePage } from '@inertiajs/react';
-import { Undo2, Plus } from 'lucide-react';
-import * as React from 'react';
-import { useCurrency } from '@/components/currency-context';
-import { useLanguage } from '@/components/language-context';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+    import { Head, Link, usePage, router } from '@inertiajs/react';
+    import { Undo2, Plus, Check, X } from 'lucide-react';
+    import * as React from 'react';
+    import { useCurrency } from '@/components/currency-context';
+    import { useLanguage } from '@/components/language-context';
+    import { Badge } from '@/components/ui/badge';
+    import { Button } from '@/components/ui/button';
+    import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface ReturnNote {
     id: number;
@@ -26,6 +26,7 @@ export default function ReturnsIndex({ returns }: ReturnIndexProps) {
     const { t } = useLanguage();
     const { auth } = usePage().props as any;
     const isSales = auth?.user?.role === 'staff_sales';
+    const isAccounting = auth?.user?.role === 'staff_accounting' || auth?.user?.role === 'manager';
 
     return (
         <>
@@ -94,7 +95,30 @@ export default function ReturnsIndex({ returns }: ReturnIndexProps) {
                                             {formatPrice(rtn.total_amount)}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            <Badge variant="secondary">{rtn.status}</Badge>
+                                            {rtn.status === 'Pending' && isAccounting ? (
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="outline" 
+                                                        className="h-7 px-2 text-green-600 border-green-200 bg-green-50 hover:bg-green-100 hover:text-green-700"
+                                                        onClick={() => router.post(`/accounting/returns/${rtn.id}/approve`)}
+                                                    >
+                                                        <Check className="size-3 mr-1" /> {t('Setujui', 'Approve')}
+                                                    </Button>
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="outline" 
+                                                        className="h-7 px-2 text-rose-600 border-rose-200 bg-rose-50 hover:bg-rose-100 hover:text-rose-700"
+                                                        onClick={() => router.post(`/accounting/returns/${rtn.id}/reject`)}
+                                                    >
+                                                        <X className="size-3 mr-1" /> {t('Tolak', 'Reject')}
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <Badge variant={rtn.status === 'Approved' ? 'default' : (rtn.status === 'Rejected' ? 'destructive' : 'secondary')}>
+                                                    {rtn.status}
+                                                </Badge>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))

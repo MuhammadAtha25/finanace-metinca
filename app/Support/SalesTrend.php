@@ -25,27 +25,35 @@ final class SalesTrend
      */
     public static function monthlyValidated(?int $userId = null): array
     {
-        $isPostgres = DB::connection()->getDriverName() === 'pgsql';
+        $driver = DB::connection()->getDriverName();
 
-        $query = $isPostgres
-            ? Order::select(
+        if ($driver === 'pgsql') {
+            $query = Order::select(
                 DB::raw("TO_CHAR(date_raised, 'Mon') as month"),
                 DB::raw('EXTRACT(MONTH FROM date_raised) as month_num'),
                 DB::raw('SUM(total_amount) as sales'),
-            )->groupBy(DB::raw("TO_CHAR(date_raised, 'Mon'), EXTRACT(MONTH FROM date_raised)"))
-            : Order::select(
+            )->groupBy(DB::raw("TO_CHAR(date_raised, 'Mon'), EXTRACT(MONTH FROM date_raised)"));
+        } elseif ($driver === 'mysql') {
+            $query = Order::select(
+                DB::raw("DATE_FORMAT(date_raised, '%b') as month"),
+                DB::raw('MONTH(date_raised) as month_num'),
+                DB::raw('SUM(total_amount) as sales'),
+            )->groupBy(DB::raw("DATE_FORMAT(date_raised, '%b'), MONTH(date_raised)"));
+        } else {
+            $query = Order::select(
                 DB::raw("strftime('%m', date_raised) as month_num"),
                 DB::raw('SUM(total_amount) as sales'),
             )->groupBy('month_num');
+        }
 
-        $query->where('status', OrderStatus::VALIDATED)->orderBy('month_num');
+        $query->whereIn('status', [OrderStatus::UTANG, OrderStatus::LUNAS])->orderBy('month_num');
 
         if ($userId !== null) {
             $query->where('user_id', $userId);
         }
 
         return $query->get()->map(fn ($item) => [
-            'month' => $isPostgres
+            'month' => ($driver === 'pgsql' || $driver === 'mysql')
                 ? $item->month
                 : (self::MONTHS[sprintf('%02d', $item->month_num)] ?? (string) $item->month_num),
             'sales' => (float) $item->sales,

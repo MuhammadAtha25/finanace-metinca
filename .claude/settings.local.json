@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan *)",
+      "PowerShell(php artisan migrate:fresh --seed 2>&1)"
+    ]
+  }
+}

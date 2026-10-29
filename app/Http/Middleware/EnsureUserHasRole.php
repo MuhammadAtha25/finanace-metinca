@@ -19,7 +19,12 @@ class EnsureUserHasRole
             return redirect()->route('login');
         }
 
-        if (! in_array($request->user()->role, $roles)) {
+        $allowedRoles = [];
+        foreach ($roles as $roleGroup) {
+            $allowedRoles = array_merge($allowedRoles, array_map('trim', explode(',', $roleGroup)));
+        }
+
+        if (! in_array($request->user()->role, $allowedRoles)) {
             abort(403, 'Unauthorized action.');
         }
 

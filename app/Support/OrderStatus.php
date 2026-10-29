@@ -15,7 +15,9 @@ final class OrderStatus
 
     public const SUBMITTED = 'Submitted';
 
-    public const VALIDATED = 'Validated';
+    public const UTANG = 'utang';
+
+    public const LUNAS = 'lunas';
 
     public const REJECTED = 'Rejected';
 

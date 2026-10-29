@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { usePage } from '@inertiajs/react';
-import { LayoutGrid, ShoppingCart, BarChart3, GitFork, Package, Users, Globe, Languages, ClipboardList, FileText, Box, Undo2 } from 'lucide-react';
+import { LayoutGrid, ShoppingCart, BarChart3, GitFork, Package, Users, Globe, Languages, ClipboardList, FileText, Box, Undo2, Plus } from 'lucide-react';
 import * as React from 'react';
 import AppLogo from '@/components/app-logo';
 import { useCurrency } from '@/components/currency-context';
@@ -38,10 +38,17 @@ const mainNavItemsRaw: RawNavItem[] = [
         icon: LayoutGrid,
     },
     {
-        titleId: 'Analisis & Laporan',
-        titleEn: 'Analytics & Reports',
-        href: '/analytics',
-        icon: BarChart3,
+        titleId: 'Inbox Laporan',
+        titleEn: 'Report Inbox',
+        href: '/manager/reports',
+        icon: ClipboardList,
+        roles: ['manager'],
+    },
+    {
+        titleId: 'Rekap Penjualan Valid',
+        titleEn: 'Validated Sales Recap',
+        href: '/manager/sales-recap',
+        icon: FileText,
         roles: ['manager'],
     },
     {
@@ -52,38 +59,24 @@ const mainNavItemsRaw: RawNavItem[] = [
         roles: ['staff_accounting'],
     },
     {
-        titleId: 'Rekap Penjualan',
-        titleEn: 'Sales Recap',
-        href: '/accounting/rekap',
-        icon: Package,
-        roles: ['staff_accounting'],
-    },
-    {
-        titleId: 'Rekap Invoice PO',
-        titleEn: 'PO Invoice Recap',
-        href: '/accounting/invoice-rekap',
+        titleId: 'Riwayat Invoice',
+        titleEn: 'Invoice History',
+        href: '/sales/invoice-rekap',
         icon: FileText,
-        roles: ['staff_accounting'],
+        roles: ['staff_sales'],
     },
     {
         titleId: 'Rekapan per PT',
         titleEn: 'Customer Statement',
         href: '/reports/customer-recap',
         icon: FileText,
-        roles: ['staff_accounting', 'manager'],
+        roles: ['staff_accounting'],
     },
     {
-        titleId: 'Entri Pesanan',
-        titleEn: 'Order Entry',
-        href: '/orders',
-        icon: ShoppingCart,
-        roles: ['staff_sales', 'staff_accounting', 'manager'],
-    },
-    {
-        titleId: 'Pipeline Penjualan',
-        titleEn: 'Sales Pipeline',
-        href: '/pipeline',
-        icon: GitFork,
+        titleId: 'Input Invoice Baru',
+        titleEn: 'New Invoice Entry',
+        href: '/invoices/create',
+        icon: Plus,
         roles: ['staff_sales'],
     },
     {
@@ -91,21 +84,21 @@ const mainNavItemsRaw: RawNavItem[] = [
         titleEn: 'Item Returns',
         href: '/returns',
         icon: Undo2,
-        roles: ['staff_sales', 'staff_accounting', 'manager'],
+        roles: ['staff_sales', 'staff_accounting'],
     },
     {
         titleId: 'Pelanggan',
         titleEn: 'Customers',
         href: '/customers',
         icon: Users,
-        roles: ['staff_sales', 'staff_accounting', 'manager'],
+        roles: ['staff_sales', 'staff_accounting'],
     },
     {
         titleId: 'Produk',
         titleEn: 'Products',
         href: '/products',
         icon: Box,
-        roles: ['staff_sales', 'staff_accounting', 'manager'],
+        roles: ['staff_sales', 'staff_accounting'],
     },
 ];
 
