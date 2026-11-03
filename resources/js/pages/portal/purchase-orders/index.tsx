@@ -119,7 +119,7 @@ export default function PurchaseOrdersIndex({
     products = [],
 }: Props) {
     const { formatPrice } = useCurrency();
-    const { language } = useLanguage();
+    const { language, t } = useLanguage();
     const { props } = usePage<{
         auth: { user: { id: number; name: string; role: string } };
         flash?: { success?: string; error?: string };
@@ -129,7 +129,7 @@ export default function PurchaseOrdersIndex({
     const isManager = userRole === 'manager';
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Purchase Order (PO)', href: '/purchase-orders' },
+        { title: t('Pesanan Pembelian (PO)', 'Purchase Orders (PO)'), href: '/purchase-orders' },
     ];
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -292,17 +292,17 @@ export default function PurchaseOrdersIndex({
 
     const handleExportCsv = () => {
         const headers = [
-            'PO Number',
-            'Supplier',
-            'Plant',
-            'Created Date',
-            'Expected Date',
-            'Total Qty',
-            'Total Value (IDR)',
-            'Created By',
-            'Approved By',
-            'Status',
-            'Payment Status',
+            t('Nomor PO', 'PO Number'),
+            t('Pemasok', 'Supplier'),
+            t('Pabrik', 'Plant'),
+            t('Tanggal Dibuat', 'Created Date'),
+            t('Estimasi Tiba', 'Expected Date'),
+            t('Total Qty', 'Total Qty'),
+            t('Total Nilai (IDR)', 'Total Value (IDR)'),
+            t('Dibuat Oleh', 'Created By'),
+            t('Disetujui Oleh', 'Approved By'),
+            t('Status', 'Status'),
+            t('Status Pembayaran', 'Payment Status'),
         ];
         const rows = filteredPos.map((po) => [
             po.po_number,
@@ -336,32 +336,32 @@ export default function PurchaseOrdersIndex({
             case 'Draft':
                 return (
                     <Badge variant="outline" className="border-slate-300 bg-slate-100 text-slate-700">
-                        Draft
+                        {t('Draf', 'Draft')}
                     </Badge>
                 );
             case 'Submitted':
             case 'Pending':
                 return (
                     <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
-                        Submitted
+                        {t('Diajukan', 'Submitted')}
                     </Badge>
                 );
             case 'Approved':
                 return (
                     <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">
-                        Approved
+                        {t('Disetujui', 'Approved')}
                     </Badge>
                 );
             case 'Received':
                 return (
                     <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
-                        Received
+                        {t('Diterima', 'Received')}
                     </Badge>
                 );
             case 'Rejected':
                 return (
                     <Badge variant="outline" className="border-rose-200 bg-rose-50 text-rose-700">
-                        Rejected
+                        {t('Ditolak', 'Rejected')}
                     </Badge>
                 );
             default:
@@ -371,7 +371,7 @@ export default function PurchaseOrdersIndex({
 
     return (
         <>
-            <Head title="Purchase Order (PO) — Procurement" />
+            <Head title={t('Purchase Order (PO) — Pengadaan Supplier', 'Purchase Order (PO) — Procurement')} />
 
             <div className="flex h-full min-w-0 flex-1 flex-col gap-4 bg-slate-50/40 p-4 sm:gap-6 sm:p-6 dark:bg-transparent">
                 {/* Flash Message */}
@@ -393,14 +393,13 @@ export default function PurchaseOrdersIndex({
                     <div className="min-w-0 flex-1">
                         <h1 className="flex items-center gap-2.5 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                             <ShoppingBag className="size-7 shrink-0 text-indigo-600" />
-                            {language === 'id'
-                                ? 'Purchase Order (PO) & Pengadaan Supplier'
-                                : 'Purchase Orders & Supplier Procurement'}
+                            {t('Purchase Order (PO) & Pengadaan Supplier', 'Purchase Orders (PO) & Supplier Procurement')}
                         </h1>
                         <p className="mt-1 text-sm text-slate-500">
-                            {language === 'id'
-                                ? 'Kelola pengadaan bahan baku & barang industri PT. Metinca Prima Industrial Works beserta alur validasi Manager Accounting.'
-                                : 'Manage raw material & industrial goods procurement and Manager Accounting approval workflow.'}
+                            {t(
+                                'Kelola pengadaan bahan baku & barang industri PT. Metinca Prima Industrial Works beserta alur validasi Manajer Akuntansi.',
+                                'Manage raw material & industrial goods procurement and Accounting Manager approval workflow.'
+                            )}
                         </p>
                     </div>
                     <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -410,19 +409,19 @@ export default function PurchaseOrdersIndex({
                             className="gap-1.5 border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100/70 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300"
                         >
                             <FileSpreadsheet className="size-4 text-emerald-600 dark:text-emerald-400" />
-                            Export CSV
+                            {t('Ekspor CSV', 'Export CSV')}
                         </Button>
                         <Button
                             onClick={() => setIsCreateOpen(true)}
                             className="gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700"
                         >
                             <Plus className="size-4" />
-                            {language === 'id' ? 'Buat Purchase Order (Create PO)' : 'Create PO'}
+                            {t('Buat Purchase Order (PO)', 'Create Purchase Order (PO)')}
                         </Button>
                     </div>
                 </div>
 
-                {/* 4 Status Cards (Matching ADI's Procurement.tsx) + Financial Summary */}
+                {/* 4 Status Cards + Financial Summary */}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-6 sm:gap-4">
                     <Card
                         onClick={() => setStatusFilter(statusFilter === 'Draft' ? 'ALL' : 'Draft')}
@@ -432,12 +431,12 @@ export default function PurchaseOrdersIndex({
                     >
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-slate-500">POs Draft</span>
+                                <span className="text-xs font-medium text-slate-500">{t('Draf PO', 'Draft POs')}</span>
                                 <FileText className="size-4 text-slate-500" />
                             </div>
                             <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{kpis.draft}</p>
                             <p className="mt-0.5 text-[11px] text-slate-400">
-                                {language === 'id' ? 'Belum diajukan' : 'Not yet submitted'}
+                                {t('Belum diajukan', 'Not yet submitted')}
                             </p>
                         </CardContent>
                     </Card>
@@ -450,12 +449,12 @@ export default function PurchaseOrdersIndex({
                     >
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-amber-800 dark:text-amber-300">POs Submitted</span>
+                                <span className="text-xs font-medium text-amber-800 dark:text-amber-300">{t('PO Diajukan', 'Submitted POs')}</span>
                                 <Clock className="size-4 text-amber-600" />
                             </div>
                             <p className="mt-2 text-2xl font-bold text-amber-700 dark:text-amber-400">{kpis.submitted}</p>
                             <p className="mt-0.5 text-[11px] text-amber-600/80">
-                                {language === 'id' ? 'Menunggu validasi Manager' : 'Awaiting Manager approval'}
+                                {t('Menunggu validasi Manajer', 'Awaiting Manager approval')}
                             </p>
                         </CardContent>
                     </Card>
@@ -468,12 +467,12 @@ export default function PurchaseOrdersIndex({
                     >
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-blue-800 dark:text-blue-300">POs Approved</span>
+                                <span className="text-xs font-medium text-blue-800 dark:text-blue-300">{t('PO Disetujui', 'Approved POs')}</span>
                                 <CheckCircle2 className="size-4 text-blue-600" />
                             </div>
                             <p className="mt-2 text-2xl font-bold text-blue-700 dark:text-blue-400">{kpis.approved}</p>
                             <p className="mt-0.5 text-[11px] text-blue-600/80">
-                                {language === 'id' ? 'Disetujui Manager' : 'Approved by Manager'}
+                                {t('Disetujui Manajer', 'Approved by Manager')}
                             </p>
                         </CardContent>
                     </Card>
@@ -486,12 +485,12 @@ export default function PurchaseOrdersIndex({
                     >
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-emerald-800 dark:text-emerald-300">POs Received</span>
+                                <span className="text-xs font-medium text-emerald-800 dark:text-emerald-300">{t('PO Diterima', 'Received POs')}</span>
                                 <PackageCheck className="size-4 text-emerald-600" />
                             </div>
                             <p className="mt-2 text-2xl font-bold text-emerald-700 dark:text-emerald-400">{kpis.received}</p>
                             <p className="mt-0.5 text-[11px] text-emerald-600/80">
-                                {language === 'id' ? 'Barang masuk gudang' : 'Goods received in stock'}
+                                {t('Barang masuk gudang', 'Goods received in stock')}
                             </p>
                         </CardContent>
                     </Card>
@@ -500,7 +499,7 @@ export default function PurchaseOrdersIndex({
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-medium text-slate-500">
-                                    {language === 'id' ? 'Total Nilai PO' : 'Total PO Value'}
+                                    {t('Total Nilai PO', 'Total PO Value')}
                                 </span>
                                 <ShoppingBag className="size-4 text-indigo-600" />
                             </div>
@@ -508,7 +507,7 @@ export default function PurchaseOrdersIndex({
                                 {formatCurrency(kpis.totalValue)}
                             </p>
                             <p className="mt-0.5 text-[11px] text-slate-400">
-                                {purchase_orders.length} {language === 'id' ? 'dokumen PO' : 'PO documents'}
+                                {purchase_orders.length} {t('dokumen PO', 'PO documents')}
                             </p>
                         </CardContent>
                     </Card>
@@ -517,7 +516,7 @@ export default function PurchaseOrdersIndex({
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-medium text-rose-800 dark:text-rose-300">
-                                    {language === 'id' ? 'Utang Usaha PO (Neraca)' : 'Accounts Payable (PO)'}
+                                    {t('Utang Usaha PO (Neraca)', 'Accounts Payable PO (Balance Sheet)')}
                                 </span>
                                 <Wallet className="size-4 text-rose-600" />
                             </div>
@@ -525,24 +524,25 @@ export default function PurchaseOrdersIndex({
                                 {formatCurrency(kpis.unpaidPayables)}
                             </p>
                             <p className="mt-0.5 text-[11px] text-rose-600/80">
-                                {language === 'id' ? 'Approved/Received belum lunas' : 'Unpaid Approved/Received'}
+                                {t('Disetujui/Diterima belum lunas', 'Unpaid Approved/Received')}
                             </p>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Filter Bar + Table (Matching ADI's Procurement.tsx) */}
+                {/* Filter Bar + Table */}
                 <Card className="border-slate-200 shadow-xs">
                     <CardHeader className="border-b border-slate-100 pb-4 dark:border-slate-800">
                         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                             <div>
                                 <CardTitle className="text-base">
-                                    {language === 'id' ? 'Daftar Purchase Order (PO)' : 'Purchase Orders List'}
+                                    {t('Daftar Purchase Order (PO)', 'Purchase Orders List')}
                                 </CardTitle>
                                 <CardDescription>
-                                    {language === 'id'
-                                        ? 'Klik baris atau tombol View untuk mencetak dokumen Purchase Order resmi.'
-                                        : 'Click View to inspect or print the official Purchase Order document.'}
+                                    {t(
+                                        'Klik baris atau tombol Lihat untuk mencetak dokumen Purchase Order resmi.',
+                                        'Click row or View button to inspect or print the official Purchase Order document.'
+                                    )}
                                 </CardDescription>
                             </div>
 
@@ -552,26 +552,22 @@ export default function PurchaseOrdersIndex({
                                     <Input
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        placeholder={
-                                            language === 'id'
-                                                ? 'Cari nomor PO atau supplier...'
-                                                : 'Search by PO number or supplier...'
-                                        }
+                                        placeholder={t('Cari nomor PO atau pemasok...', 'Search by PO number or supplier...')}
                                         className="pl-9"
                                     />
                                 </div>
 
                                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                                     <SelectTrigger className="w-full sm:w-[160px]">
-                                        <SelectValue placeholder="All Status" />
+                                        <SelectValue placeholder={t('Semua Status', 'All Status')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="ALL">All Status</SelectItem>
-                                        <SelectItem value="Draft">Draft</SelectItem>
-                                        <SelectItem value="Submitted">Submitted</SelectItem>
-                                        <SelectItem value="Approved">Approved</SelectItem>
-                                        <SelectItem value="Received">Received</SelectItem>
-                                        <SelectItem value="Rejected">Rejected</SelectItem>
+                                        <SelectItem value="ALL">{t('Semua Status', 'All Status')}</SelectItem>
+                                        <SelectItem value="Draft">{t('Draf', 'Draft')}</SelectItem>
+                                        <SelectItem value="Submitted">{t('Diajukan', 'Submitted')}</SelectItem>
+                                        <SelectItem value="Approved">{t('Disetujui', 'Approved')}</SelectItem>
+                                        <SelectItem value="Received">{t('Diterima', 'Received')}</SelectItem>
+                                        <SelectItem value="Rejected">{t('Ditolak', 'Rejected')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -582,27 +578,28 @@ export default function PurchaseOrdersIndex({
                         <Table className="min-w-[1000px]">
                             <TableHeader className="bg-slate-50/80 dark:bg-slate-900/40">
                                 <TableRow>
-                                    <TableHead>PO Number</TableHead>
-                                    <TableHead>Supplier</TableHead>
-                                    <TableHead>Plant / Cabang</TableHead>
-                                    <TableHead>Created Date</TableHead>
-                                    <TableHead>Expected</TableHead>
-                                    <TableHead className="text-center">Items</TableHead>
-                                    <TableHead className="text-right">Total Value</TableHead>
-                                    <TableHead>Created By</TableHead>
-                                    <TableHead>Approved By</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Pembayaran</TableHead>
-                                    <TableHead className="text-right">Action</TableHead>
+                                    <TableHead>{t('Nomor PO', 'PO Number')}</TableHead>
+                                    <TableHead>{t('Pemasok', 'Supplier')}</TableHead>
+                                    <TableHead>{t('Pabrik / Cabang', 'Plant / Branch')}</TableHead>
+                                    <TableHead>{t('Tanggal Dibuat', 'Created Date')}</TableHead>
+                                    <TableHead>{t('Estimasi Tiba', 'Expected Date')}</TableHead>
+                                    <TableHead className="text-center">{t('Item', 'Items')}</TableHead>
+                                    <TableHead className="text-right">{t('Total Nilai', 'Total Value')}</TableHead>
+                                    <TableHead>{t('Dibuat Oleh', 'Created By')}</TableHead>
+                                    <TableHead>{t('Disetujui Oleh', 'Approved By')}</TableHead>
+                                    <TableHead>{t('Status', 'Status')}</TableHead>
+                                    <TableHead>{t('Pembayaran', 'Payment')}</TableHead>
+                                    <TableHead className="text-right">{t('Aksi', 'Action')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {filteredPos.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={12} className="h-32 text-center text-slate-500">
-                                            {language === 'id'
-                                                ? 'Tidak ada Purchase Order yang sesuai dengan filter.'
-                                                : 'No Purchase Orders match the current filter.'}
+                                            {t(
+                                                'Tidak ada Purchase Order yang sesuai dengan filter.',
+                                                'No Purchase Orders match the current filter.'
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -645,14 +642,14 @@ export default function PurchaseOrdersIndex({
                                             <TableCell>
                                                 {po.payment_status === 'paid' ? (
                                                     <Badge className="bg-emerald-600 text-[10px] text-white hover:bg-emerald-700">
-                                                        Lunas
+                                                        {t('Lunas', 'Paid')}
                                                     </Badge>
                                                 ) : (
                                                     <Badge
                                                         variant="outline"
                                                         className="border-amber-300 bg-amber-50 text-[10px] text-amber-800"
                                                     >
-                                                        Belum Lunas
+                                                        {t('Belum Lunas', 'Unpaid')}
                                                     </Badge>
                                                 )}
                                             </TableCell>
@@ -665,7 +662,7 @@ export default function PurchaseOrdersIndex({
                                                         className="h-7 gap-1 px-2 text-xs"
                                                     >
                                                         <Eye className="size-3.5" />
-                                                        View
+                                                        {t('Lihat', 'View')}
                                                     </Button>
 
                                                     {/* Submit button for Draft / Rejected */}
@@ -676,7 +673,7 @@ export default function PurchaseOrdersIndex({
                                                             className="h-7 gap-1 bg-amber-600 px-2 text-xs text-white hover:bg-amber-700"
                                                         >
                                                             <Send className="size-3" />
-                                                            Submit
+                                                            {t('Kirim', 'Submit')}
                                                         </Button>
                                                     )}
 
@@ -690,7 +687,7 @@ export default function PurchaseOrdersIndex({
                                                                     className="h-7 gap-1 bg-emerald-600 px-2.5 text-xs text-white hover:bg-emerald-700"
                                                                 >
                                                                     <CheckCircle2 className="size-3" />
-                                                                    Approve
+                                                                    {t('Setujui', 'Approve')}
                                                                 </Button>
                                                                 <Button
                                                                     size="sm"
@@ -701,7 +698,7 @@ export default function PurchaseOrdersIndex({
                                                                     }}
                                                                     className="h-7 border-rose-200 px-2 text-xs text-rose-600 hover:bg-rose-50"
                                                                 >
-                                                                    Reject
+                                                                    {t('Tolak', 'Reject')}
                                                                 </Button>
                                                             </>
                                                         )}
@@ -714,7 +711,7 @@ export default function PurchaseOrdersIndex({
                                                             className="h-7 gap-1 bg-blue-600 px-2 text-xs text-white hover:bg-blue-700"
                                                         >
                                                             <PackageCheck className="size-3" />
-                                                            Receive
+                                                            {t('Terima', 'Receive')}
                                                         </Button>
                                                     )}
 
@@ -729,7 +726,7 @@ export default function PurchaseOrdersIndex({
                                                                 className="h-7 border-emerald-300 bg-emerald-50 px-2 text-xs text-emerald-700 hover:bg-emerald-100"
                                                             >
                                                                 <Wallet className="size-3" />
-                                                                Bayar
+                                                                {t('Bayar', 'Pay')}
                                                             </Button>
                                                         )}
                                                 </div>
@@ -748,12 +745,13 @@ export default function PurchaseOrdersIndex({
                 <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
                     <DialogHeader>
                         <DialogTitle>
-                            {language === 'id' ? 'Buat Purchase Order Baru (Create PO)' : 'Create New Purchase Order'}
+                            {t('Buat Purchase Order Baru (PO)', 'Create New Purchase Order (PO)')}
                         </DialogTitle>
                         <DialogDescription>
-                            {language === 'id'
-                                ? 'Pilih supplier, plant tujuan, dan daftar barang yang dipesan. PO berstatus Submitted akan langsung mengirim notifikasi ke Manager Accounting.'
-                                : 'Select supplier, destination plant, and ordered items.'}
+                            {t(
+                                'Pilih pemasok, pabrik tujuan, dan daftar barang yang dipesan. PO berstatus Diajukan akan langsung mengirim notifikasi ke Manajer Akuntansi.',
+                                'Select supplier, destination plant, and ordered items. Submitted PO will notify Accounting Manager directly.'
+                            )}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -761,7 +759,7 @@ export default function PurchaseOrdersIndex({
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div className="space-y-1.5">
                                 <div className="flex items-center justify-between">
-                                    <Label>Supplier</Label>
+                                    <Label>{t('Pemasok (Supplier)', 'Supplier')}</Label>
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -775,14 +773,14 @@ export default function PurchaseOrdersIndex({
                                         }}
                                         className="text-xs font-medium text-indigo-600 hover:underline"
                                     >
-                                        {useNewSupplier ? 'Pilih dari daftar supplier' : '+ Input supplier baru'}
+                                        {useNewSupplier ? t('Pilih dari daftar pemasok', 'Select from supplier list') : t('+ Input pemasok baru', '+ New supplier')}
                                     </button>
                                 </div>
                                 {useNewSupplier ? (
                                     <Input
                                         value={form.data.new_supplier_name}
                                         onChange={(e) => form.setData('new_supplier_name', e.target.value)}
-                                        placeholder="Contoh: PT Krakatau Steel Tbk"
+                                        placeholder={t('Contoh: PT Krakatau Steel Tbk', 'Example: PT Krakatau Steel Tbk')}
                                         required
                                     />
                                 ) : (
@@ -791,7 +789,7 @@ export default function PurchaseOrdersIndex({
                                         onValueChange={(v) => form.setData('supplier_id', v)}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Pilih Supplier" />
+                                            <SelectValue placeholder={t('Pilih Pemasok', 'Select Supplier')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {suppliers.map((s) => (
@@ -805,13 +803,13 @@ export default function PurchaseOrdersIndex({
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label>Plant / Lokasi Penerimaan</Label>
+                                <Label>{t('Pabrik / Lokasi Penerimaan', 'Plant / Delivery Location')}</Label>
                                 <Select
                                     value={form.data.plant_id}
                                     onValueChange={(v) => form.setData('plant_id', v)}
                                 >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Pilih Plant" />
+                                        <SelectValue placeholder={t('Pilih Pabrik', 'Select Plant')} />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {plants.map((p) => (
@@ -824,7 +822,7 @@ export default function PurchaseOrdersIndex({
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label>Created Date</Label>
+                                <Label>{t('Tanggal Dibuat', 'Created Date')}</Label>
                                 <Input
                                     type="date"
                                     value={form.data.date}
@@ -834,7 +832,7 @@ export default function PurchaseOrdersIndex({
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label>Expected Delivery Date</Label>
+                                <Label>{t('Estimasi Tanggal Pengiriman', 'Expected Delivery Date')}</Label>
                                 <Input
                                     type="date"
                                     value={form.data.expected_date}
@@ -844,7 +842,7 @@ export default function PurchaseOrdersIndex({
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label>Status Pengajuan</Label>
+                                <Label>{t('Status Pengajuan', 'Submission Status')}</Label>
                                 <Select
                                     value={form.data.status}
                                     onValueChange={(v: 'Draft' | 'Submitted') => form.setData('status', v)}
@@ -854,19 +852,19 @@ export default function PurchaseOrdersIndex({
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="Submitted">
-                                            Submitted (Langsung kirim ke Manager Accounting)
+                                            {t('Diajukan (Langsung kirim ke Manajer Akuntansi)', 'Submitted (Send directly to Accounting Manager)')}
                                         </SelectItem>
-                                        <SelectItem value="Draft">Draft (Simpan sementara)</SelectItem>
+                                        <SelectItem value="Draft">{t('Draf (Simpan sementara)', 'Draft (Save as draft)')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label>Catatan Pengadaan (Opsional)</Label>
+                                <Label>{t('Catatan Pengadaan (Opsional)', 'Procurement Notes (Optional)')}</Label>
                                 <Input
                                     value={form.data.notes}
                                     onChange={(e) => form.setData('notes', e.target.value)}
-                                    placeholder="Spesifikasi material / jadwal pengiriman..."
+                                    placeholder={t('Spesifikasi material / jadwal pengiriman...', 'Material specifications / delivery schedule...')}
                                 />
                             </div>
                         </div>
@@ -874,7 +872,7 @@ export default function PurchaseOrdersIndex({
                         {/* Line Items */}
                         <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-900/40">
                             <div className="flex items-center justify-between">
-                                <Label className="text-sm font-semibold">Rincian Barang / Material PO</Label>
+                                <Label className="text-sm font-semibold">{t('Rincian Barang / Material PO', 'PO Items / Materials Details')}</Label>
                                 <Button
                                     type="button"
                                     size="sm"
@@ -883,7 +881,7 @@ export default function PurchaseOrdersIndex({
                                     className="h-7 gap-1 text-xs"
                                 >
                                     <Plus className="size-3.5" />
-                                    Tambah Baris Barang
+                                    {t('Tambah Baris Barang', 'Add Item Row')}
                                 </Button>
                             </div>
 
@@ -894,7 +892,7 @@ export default function PurchaseOrdersIndex({
                                         className="grid grid-cols-12 items-end gap-2 rounded-lg border border-slate-200 bg-white p-2.5 dark:border-slate-800 dark:bg-slate-900"
                                     >
                                         <div className="col-span-12 sm:col-span-5">
-                                            <Label className="text-[11px] text-slate-500">Produk / Material</Label>
+                                            <Label className="text-[11px] text-slate-500">{t('Produk / Material', 'Product / Material')}</Label>
                                             <Select
                                                 value={String(item.product_id)}
                                                 onValueChange={(v) => handleItemChange(idx, 'product_id', Number(v))}
@@ -905,7 +903,7 @@ export default function PurchaseOrdersIndex({
                                                 <SelectContent>
                                                     {products.map((prod) => (
                                                         <SelectItem key={prod.id} value={String(prod.id)}>
-                                                            [{prod.code}] {prod.name} (Stok: {prod.stock} {prod.unit})
+                                                            [{prod.code}] {prod.name} ({t('Stok', 'Stock')}: {prod.stock} {prod.unit})
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
@@ -913,7 +911,7 @@ export default function PurchaseOrdersIndex({
                                         </div>
 
                                         <div className="col-span-4 sm:col-span-2">
-                                            <Label className="text-[11px] text-slate-500">Qty</Label>
+                                            <Label className="text-[11px] text-slate-500">{t('Qty', 'Qty')}</Label>
                                             <Input
                                                 type="number"
                                                 min={1}
@@ -926,7 +924,7 @@ export default function PurchaseOrdersIndex({
                                         </div>
 
                                         <div className="col-span-6 sm:col-span-3">
-                                            <Label className="text-[11px] text-slate-500">Harga Beli Satuan (Rp)</Label>
+                                            <Label className="text-[11px] text-slate-500">{t('Harga Beli Satuan (Rp)', 'Unit Price (Rp)')}</Label>
                                             <Input
                                                 type="number"
                                                 min={0}
@@ -963,7 +961,7 @@ export default function PurchaseOrdersIndex({
                             </div>
 
                             <div className="flex items-center justify-between border-t border-slate-200 pt-3">
-                                <span className="text-xs font-medium text-slate-500">Total Nilai Purchase Order</span>
+                                <span className="text-xs font-medium text-slate-500">{t('Total Nilai Purchase Order', 'Total Purchase Order Value')}</span>
                                 <span className="text-lg font-bold text-indigo-600">
                                     {formatCurrency(formTotalAmount)}
                                 </span>
@@ -972,14 +970,14 @@ export default function PurchaseOrdersIndex({
 
                         <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
-                                Batal
+                                {t('Batal', 'Cancel')}
                             </Button>
                             <Button
                                 type="submit"
                                 disabled={form.processing}
                                 className="bg-indigo-600 text-white hover:bg-indigo-700"
                             >
-                                Simpan Purchase Order
+                                {t('Simpan Purchase Order', 'Save Purchase Order')}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -1003,57 +1001,57 @@ export default function PurchaseOrdersIndex({
                                             PT. Metinca Prima Industrial Works
                                         </p>
                                         <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                                            PURCHASE ORDER — {selectedPo.po_number}
+                                            {t('PESANAN PEMBELIAN', 'PURCHASE ORDER')} — {selectedPo.po_number}
                                         </h3>
                                         <p className="text-xs text-slate-500">
-                                            Plant Tujuan: {selectedPo.plant_name} ({selectedPo.branch_name})
+                                            {t('Pabrik Tujuan', 'Destination Plant')}: {selectedPo.plant_name} ({selectedPo.branch_name})
                                         </p>
                                     </div>
                                 </div>
                                 <div className="text-right">
                                     {renderStatusBadge(selectedPo.status)}
-                                    <p className="mt-1 text-xs text-slate-500">Tanggal PO: {selectedPo.date}</p>
-                                    <p className="text-xs text-slate-500">Expected: {selectedPo.expected_date}</p>
+                                    <p className="mt-1 text-xs text-slate-500">{t('Tanggal PO', 'PO Date')}: {selectedPo.date}</p>
+                                    <p className="text-xs text-slate-500">{t('Estimasi Tiba', 'Expected Date')}: {selectedPo.expected_date}</p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 rounded-xl border border-slate-200 bg-slate-50/70 p-4 text-xs sm:grid-cols-4 dark:border-slate-800 dark:bg-slate-900/40">
                                 <div>
-                                    <span className="text-slate-400">Vendor / Supplier</span>
+                                    <span className="text-slate-400">{t('Pemasok (Vendor)', 'Vendor / Supplier')}</span>
                                     <p className="mt-0.5 font-semibold text-slate-900 dark:text-white">
                                         {selectedPo.supplier_name}
                                     </p>
                                 </div>
                                 <div>
-                                    <span className="text-slate-400">Dibuat Oleh (Created By)</span>
+                                    <span className="text-slate-400">{t('Dibuat Oleh', 'Created By')}</span>
                                     <p className="mt-0.5 font-semibold text-slate-900 dark:text-white">
                                         {selectedPo.created_by_name}
                                     </p>
                                 </div>
                                 <div>
-                                    <span className="text-slate-400">Disetujui Oleh (Approved By)</span>
+                                    <span className="text-slate-400">{t('Disetujui Oleh', 'Approved By')}</span>
                                     <p className="mt-0.5 font-semibold text-slate-900 dark:text-white">
                                         {selectedPo.approved_by_name}
                                     </p>
                                 </div>
                                 <div>
-                                    <span className="text-slate-400">Status Pembayaran</span>
+                                    <span className="text-slate-400">{t('Status Pembayaran', 'Payment Status')}</span>
                                     <p className="mt-0.5 font-semibold text-slate-900 dark:text-white">
-                                        {selectedPo.payment_status === 'paid' ? 'LUNAS (Paid)' : 'BELUM LUNAS (Unpaid)'}
+                                        {selectedPo.payment_status === 'paid' ? t('LUNAS (Paid)', 'PAID') : t('BELUM LUNAS (Unpaid)', 'UNPAID')}
                                     </p>
                                 </div>
                             </div>
 
                             {selectedPo.notes && (
                                 <div className="rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900">
-                                    <span className="font-semibold text-slate-800 dark:text-slate-200">Catatan PO: </span>
+                                    <span className="font-semibold text-slate-800 dark:text-slate-200">{t('Catatan PO:', 'PO Notes:')} </span>
                                     {selectedPo.notes}
                                 </div>
                             )}
 
                             {selectedPo.rejection_notes && (
                                 <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
-                                    <span className="font-semibold">Alasan Penolakan Manager: </span>
+                                    <span className="font-semibold">{t('Alasan Penolakan Manajer:', 'Manager Rejection Reason:')} </span>
                                     {selectedPo.rejection_notes}
                                 </div>
                             )}
@@ -1062,11 +1060,11 @@ export default function PurchaseOrdersIndex({
                                 <Table>
                                     <TableHeader className="bg-slate-50">
                                         <TableRow>
-                                            <TableHead>Kode</TableHead>
-                                            <TableHead>Nama Barang / Material</TableHead>
-                                            <TableHead className="text-center">Qty</TableHead>
-                                            <TableHead className="text-right">Harga Satuan</TableHead>
-                                            <TableHead className="text-right">Subtotal</TableHead>
+                                            <TableHead>{t('Kode', 'Code')}</TableHead>
+                                            <TableHead>{t('Nama Barang / Material', 'Item / Material Name')}</TableHead>
+                                            <TableHead className="text-center">{t('Qty', 'Qty')}</TableHead>
+                                            <TableHead className="text-right">{t('Harga Satuan', 'Unit Price')}</TableHead>
+                                            <TableHead className="text-right">{t('Subtotal', 'Subtotal')}</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -1087,7 +1085,7 @@ export default function PurchaseOrdersIndex({
                                         ))}
                                         <TableRow className="bg-slate-50 font-bold">
                                             <TableCell colSpan={4} className="text-right">
-                                                TOTAL PURCHASE ORDER
+                                                {t('TOTAL PURCHASE ORDER', 'TOTAL PURCHASE ORDER')}
                                             </TableCell>
                                             <TableCell className="text-right text-indigo-700">
                                                 {formatCurrency(selectedPo.total_amount)}
@@ -1100,7 +1098,7 @@ export default function PurchaseOrdersIndex({
                             <DialogFooter className="flex flex-wrap items-center justify-between gap-2">
                                 <Button variant="outline" onClick={() => window.print()} className="gap-1.5">
                                     <Printer className="size-4" />
-                                    Cetak Dokumen PO
+                                    {t('Cetak Dokumen PO', 'Print PO Document')}
                                 </Button>
                                 <div className="flex items-center gap-2">
                                     {isManager &&
@@ -1113,11 +1111,11 @@ export default function PurchaseOrdersIndex({
                                                 className="bg-emerald-600 text-white hover:bg-emerald-700"
                                             >
                                                 <CheckCircle2 className="mr-1.5 size-4" />
-                                                Approve PO Ini
+                                                {t('Setujui PO Ini', 'Approve This PO')}
                                             </Button>
                                         )}
                                     <Button variant="outline" onClick={() => setSelectedPo(null)}>
-                                        Tutup
+                                        {t('Tutup', 'Close')}
                                     </Button>
                                 </div>
                             </DialogFooter>
@@ -1130,29 +1128,32 @@ export default function PurchaseOrdersIndex({
             <Dialog open={!!rejectingPo} onOpenChange={(open) => !open && setRejectingPo(null)}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>Tolak Purchase Order ({rejectingPo?.po_number})</DialogTitle>
+                        <DialogTitle>{t('Tolak Purchase Order', 'Reject Purchase Order')} ({rejectingPo?.po_number})</DialogTitle>
                         <DialogDescription>
-                            Masukkan alasan penolakan atau catatan revisi. Notifikasi akan dikirimkan kepada pembuat PO.
+                            {t(
+                                'Masukkan alasan penolakan atau catatan revisi. Notifikasi akan dikirimkan kepada pembuat PO.',
+                                'Enter reason for rejection or revision notes. Notification will be sent to the creator.'
+                            )}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-2 py-2">
-                        <Label>Catatan Penolakan / Revisi</Label>
+                        <Label>{t('Catatan Penolakan / Revisi', 'Rejection / Revision Notes')}</Label>
                         <Input
                             value={rejectionNotes}
                             onChange={(e) => setRejectionNotes(e.target.value)}
-                            placeholder="Contoh: Harga satuan melebihi plafon anggaran kuartal ini..."
+                            placeholder={t('Contoh: Harga satuan melebihi plafon anggaran kuartal ini...', 'Example: Unit price exceeds quarterly budget cap...')}
                         />
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setRejectingPo(null)}>
-                            Batal
+                            {t('Batal', 'Cancel')}
                         </Button>
                         <Button
                             onClick={handleConfirmRejectPo}
                             disabled={!rejectionNotes.trim()}
                             className="bg-rose-600 text-white hover:bg-rose-700"
                         >
-                            Konfirmasi Tolak PO
+                            {t('Konfirmasi Tolak PO', 'Confirm Reject PO')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

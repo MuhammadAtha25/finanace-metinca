@@ -124,7 +124,7 @@ export default function ManagerNeraca({
     neraca_submissions = [],
 }: Props) {
     const { formatPrice } = useCurrency();
-    const { language } = useLanguage();
+    const { language, t } = useLanguage();
     const { props } = usePage<{
         auth: { user: { id: number; name: string; role: string } };
         flash?: { success?: string; error?: string };
@@ -139,7 +139,7 @@ export default function ManagerNeraca({
     >('receivables');
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Laporan Neraca (Balance Sheet)', href: '/manager/neraca' },
+        { title: t('Laporan Neraca (Balance Sheet)', 'Balance Sheet (Neraca)'), href: '/manager/neraca' },
     ];
 
     const formatCurrency = (val: number) => formatPrice(Number(val || 0));
@@ -208,7 +208,7 @@ export default function ManagerNeraca({
 
     return (
         <>
-            <Head title="Laporan Neraca (Balance Sheet)" />
+            <Head title={t('Laporan Neraca (Balance Sheet)', 'Balance Sheet (Neraca)')} />
 
             <div className="flex h-full min-w-0 flex-1 flex-col gap-4 bg-slate-50/40 p-4 sm:gap-6 sm:p-6 dark:bg-transparent">
                 {props.flash?.success && (
@@ -230,16 +230,16 @@ export default function ManagerNeraca({
                             <div>
                                 <h2 className="text-xl font-bold uppercase">PT. Metinca Prima Industrial Works</h2>
                                 <p className="text-sm font-semibold text-slate-700">
-                                    LAPORAN POSISI KEUANGAN (NERACA / BALANCE SHEET)
+                                    {t('LAPORAN POSISI KEUANGAN (NERACA / BALANCE SHEET)', 'STATEMENT OF FINANCIAL POSITION (BALANCE SHEET)')}
                                 </p>
                                 <p className="text-xs text-slate-500">
-                                    Per Tanggal Cut-off: {cutoff_date} (Periode {period_label})
+                                    {t('Per Tanggal Cut-off:', 'Cut-off Date:')} {cutoff_date} ({t('Periode', 'Period')} {period_label})
                                 </p>
                             </div>
                         </div>
                         <div className="text-right text-xs text-slate-600">
-                            <p>Status: {neraca.is_balanced ? 'SEIMBANG (BALANCED)' : 'PERLU REKONSILIASI'}</p>
-                            <p>Dicetak oleh: {props.auth?.user?.name}</p>
+                            <p>{t('Status:', 'Status:')} {neraca.is_balanced ? t('SEIMBANG (BALANCED)', 'BALANCED') : t('PERLU REKONSILIASI', 'RECONCILIATION NEEDED')}</p>
+                            <p>{t('Dicetak oleh:', 'Printed by:')} {props.auth?.user?.name}</p>
                         </div>
                     </div>
                 </div>
@@ -249,20 +249,19 @@ export default function ManagerNeraca({
                     <div>
                         <h1 className="flex items-center gap-2.5 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                             <Scale className="size-7 text-indigo-600" />
-                            {language === 'id'
-                                ? 'Laporan Posisi Keuangan (Neraca)'
-                                : 'Statement of Financial Position (Balance Sheet)'}
+                            {t('Laporan Posisi Keuangan (Neraca)', 'Statement of Financial Position (Balance Sheet)')}
                         </h1>
                         <p className="mt-1 text-sm text-slate-500">
-                            {language === 'id'
-                                ? `Posisi Aktiva (Aset) vs Pasiva (Liabilitas & Ekuitas) per ${cutoff_date} yang dihitung otomatis dari Kas, Piutang Invoice, Persediaan Gudang, dan Utang Purchase Order.`
-                                : `Assets vs Liabilities & Equity position as of ${cutoff_date}.`}
+                            {t(
+                                `Posisi Aktiva (Aset) vs Pasiva (Liabilitas & Ekuitas) per ${cutoff_date} yang dihitung otomatis dari Kas, Piutang Invoice, Persediaan Gudang, dan Utang Purchase Order.`,
+                                `Assets vs Liabilities & Equity position as of ${cutoff_date} calculated automatically from Cash, Receivables, Warehouse Inventory, and PO Payables.`
+                            )}
                         </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
                         <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-1 dark:border-slate-800 dark:bg-slate-900">
-                            <span className="text-xs font-medium text-slate-500">Periode:</span>
+                            <span className="text-xs font-medium text-slate-500">{t('Periode:', 'Period:')}</span>
                             <Input
                                 type="month"
                                 value={selectedPeriod}
@@ -277,12 +276,12 @@ export default function ManagerNeraca({
                             className="gap-1.5 border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100/70"
                         >
                             <FileSpreadsheet className="size-4 text-emerald-600" />
-                            Export CSV
+                            {t('Ekspor CSV', 'Export CSV')}
                         </Button>
 
                         <Button variant="outline" onClick={() => window.print()} className="gap-1.5">
                             <Printer className="size-4" />
-                            Cetak PDF
+                            {t('Cetak PDF', 'Print PDF')}
                         </Button>
 
                         {userRole === 'staff_accounting' && (
@@ -291,7 +290,7 @@ export default function ManagerNeraca({
                                 className="gap-1.5 bg-indigo-600 text-white hover:bg-indigo-700"
                             >
                                 <Send className="size-4" />
-                                Kirim Neraca ke Manager
+                                {t('Kirim Neraca ke Manajer', 'Submit Balance Sheet to Manager')}
                             </Button>
                         )}
 
@@ -301,7 +300,7 @@ export default function ManagerNeraca({
                                 className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
                             >
                                 <ShieldCheck className="size-4" />
-                                Sahkan Neraca ({pendingSubmission.period_end})
+                                {t('Sahkan Neraca', 'Validate Balance Sheet')} ({pendingSubmission.period_end})
                             </Button>
                         )}
                     </div>
@@ -319,16 +318,16 @@ export default function ManagerNeraca({
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-bold tracking-wider text-emerald-800 uppercase dark:text-emerald-300">
-                                    Status Keseimbangan
+                                    {t('Status Keseimbangan', 'Balance Status')}
                                 </span>
                                 <Scale className="size-4 text-emerald-600" />
                             </div>
                             <p className="mt-2 flex items-center gap-1.5 text-lg font-extrabold text-emerald-700 dark:text-emerald-400">
                                 <CheckCircle2 className="size-5 shrink-0" />
-                                {neraca.is_balanced ? 'NERACA SEIMBANG (BALANCED)' : 'TIDAK SEIMBANG'}
+                                {neraca.is_balanced ? t('NERACA SEIMBANG (BALANCED)', 'BALANCE SHEET BALANCED') : t('TIDAK SEIMBANG', 'UNBALANCED')}
                             </p>
                             <p className="mt-1 text-[11px] text-emerald-700/80 dark:text-emerald-300/80">
-                                Total Aktiva = Total Pasiva ({formatCurrency(neraca.aktiva.total_aktiva)})
+                                {t('Total Aktiva = Total Pasiva', 'Total Assets = Total Liabilities & Equity')} ({formatCurrency(neraca.aktiva.total_aktiva)})
                             </p>
                         </CardContent>
                     </Card>
@@ -337,7 +336,7 @@ export default function ManagerNeraca({
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-medium text-slate-500">
-                                    Current Ratio (Rasio Lancar)
+                                    {t('Current Ratio (Rasio Lancar)', 'Current Ratio')}
                                 </span>
                                 <TrendingUp className="size-4 text-indigo-600" />
                             </div>
@@ -345,7 +344,7 @@ export default function ManagerNeraca({
                                 {neraca.ratios.current_ratio}x
                             </p>
                             <p className="mt-0.5 text-[11px] text-slate-400">
-                                Aktiva Lancar / Liabilitas Lancar
+                                {t('Aktiva Lancar / Liabilitas Lancar', 'Current Assets / Current Liabilities')}
                             </p>
                         </CardContent>
                     </Card>
@@ -354,7 +353,7 @@ export default function ManagerNeraca({
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-medium text-slate-500">
-                                    Quick Ratio (Kas + Piutang)
+                                    {t('Quick Ratio (Kas + Piutang)', 'Quick Ratio (Cash + Receivables)')}
                                 </span>
                                 <Activity className="size-4 text-blue-600" />
                             </div>
@@ -362,7 +361,7 @@ export default function ManagerNeraca({
                                 {neraca.ratios.quick_ratio}x
                             </p>
                             <p className="mt-0.5 text-[11px] text-slate-400">
-                                Likuiditas cepat tanpa persediaan
+                                {t('Likuiditas cepat tanpa persediaan', 'Quick liquidity without inventory')}
                             </p>
                         </CardContent>
                     </Card>
@@ -371,7 +370,7 @@ export default function ManagerNeraca({
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-medium text-slate-500">
-                                    Debt to Asset Ratio (DAR)
+                                    {t('Debt to Asset Ratio (DAR)', 'Debt to Asset Ratio (DAR)')}
                                 </span>
                                 <Landmark className="size-4 text-amber-600" />
                             </div>
@@ -379,7 +378,7 @@ export default function ManagerNeraca({
                                 {neraca.ratios.debt_to_asset_percent}%
                             </p>
                             <p className="mt-0.5 text-[11px] text-slate-400">
-                                Porsi aset yang dibiayai liabilitas
+                                {t('Porsi aset yang dibiayai liabilitas', 'Portion of assets financed by liabilities')}
                             </p>
                         </CardContent>
                     </Card>
@@ -395,13 +394,13 @@ export default function ManagerNeraca({
                                     <div>
                                         <CardTitle className="flex items-center gap-2 text-base font-bold text-indigo-950 dark:text-indigo-200">
                                             <Wallet className="size-4 text-indigo-600" />
-                                            AKTIVA (ASSETS)
+                                            {t('AKTIVA (ASET)', 'ASSETS')}
                                         </CardTitle>
                                         <CardDescription className="text-xs">
-                                            Posisi Harta & Aset Perusahaan per {cutoff_date}
+                                            {t('Posisi Harta & Aset Perusahaan per', 'Company Assets Position as of')} {cutoff_date}
                                         </CardDescription>
                                     </div>
-                                    <Badge className="bg-indigo-600 text-white">DEBIT</Badge>
+                                    <Badge className="bg-indigo-600 text-white">{t('DEBIT', 'DEBIT')}</Badge>
                                 </div>
                             </CardHeader>
 
@@ -409,8 +408,8 @@ export default function ManagerNeraca({
                                 {/* Aset Lancar */}
                                 <div>
                                     <h3 className="mb-2.5 flex items-center justify-between border-b border-slate-200 pb-1.5 text-xs font-bold tracking-wider text-slate-700 uppercase dark:border-slate-800 dark:text-slate-300">
-                                        <span>I. Aktiva Lancar (Current Assets)</span>
-                                        <span>Nilai (IDR)</span>
+                                        <span>{t('I. Aktiva Lancar (Current Assets)', 'I. Current Assets')}</span>
+                                        <span>{t('Nilai (IDR)', 'Amount (IDR)')}</span>
                                     </h3>
                                     <div className="space-y-3">
                                         {neraca.aktiva.lancar.map((acc) => (
@@ -438,7 +437,7 @@ export default function ManagerNeraca({
                                         ))}
                                     </div>
                                     <div className="mt-3 flex items-center justify-between rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-                                        <span>Total Aktiva Lancar</span>
+                                        <span>{t('Total Aktiva Lancar', 'Total Current Assets')}</span>
                                         <span className="font-mono">{formatCurrency(neraca.aktiva.total_lancar)}</span>
                                     </div>
                                 </div>
@@ -446,8 +445,8 @@ export default function ManagerNeraca({
                                 {/* Aset Tetap */}
                                 <div>
                                     <h3 className="mb-2.5 flex items-center justify-between border-b border-slate-200 pb-1.5 text-xs font-bold tracking-wider text-slate-700 uppercase dark:border-slate-800 dark:text-slate-300">
-                                        <span>II. Aktiva Tetap (Fixed Assets)</span>
-                                        <span>Nilai (IDR)</span>
+                                        <span>{t('II. Aktiva Tetap (Fixed Assets)', 'II. Fixed Assets')}</span>
+                                        <span>{t('Nilai (IDR)', 'Amount (IDR)')}</span>
                                     </h3>
                                     <div className="space-y-3">
                                         {neraca.aktiva.tetap.map((acc) => (
@@ -481,7 +480,7 @@ export default function ManagerNeraca({
                                         ))}
                                     </div>
                                     <div className="mt-3 flex items-center justify-between rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-                                        <span>Total Aktiva Tetap (Bersih)</span>
+                                        <span>{t('Total Aktiva Tetap (Bersih)', 'Total Fixed Assets (Net)')}</span>
                                         <span className="font-mono">{formatCurrency(neraca.aktiva.total_tetap)}</span>
                                     </div>
                                 </div>
@@ -490,7 +489,7 @@ export default function ManagerNeraca({
 
                         <div className="border-t-2 border-indigo-600 bg-indigo-950 px-5 py-4 text-white">
                             <div className="flex items-center justify-between">
-                                <span className="text-sm font-bold tracking-wider uppercase">TOTAL AKTIVA (ASSETS)</span>
+                                <span className="text-sm font-bold tracking-wider uppercase">{t('TOTAL AKTIVA (ASET)', 'TOTAL ASSETS')}</span>
                                 <span className="font-mono text-lg font-extrabold text-emerald-300">
                                     {formatCurrency(neraca.aktiva.total_aktiva)}
                                 </span>
@@ -506,13 +505,13 @@ export default function ManagerNeraca({
                                     <div>
                                         <CardTitle className="flex items-center gap-2 text-base font-bold text-emerald-950 dark:text-emerald-200">
                                             <Building2 className="size-4 text-emerald-600" />
-                                            PASIVA (LIABILITAS & EKUITAS)
+                                            {t('PASIVA (LIABILITAS & EKUITAS)', 'LIABILITIES & EQUITY')}
                                         </CardTitle>
                                         <CardDescription className="text-xs">
-                                            Posisi Kewajiban & Modal Perusahaan per {cutoff_date}
+                                            {t('Posisi Kewajiban & Modal Perusahaan per', 'Company Liabilities & Equity Position as of')} {cutoff_date}
                                         </CardDescription>
                                     </div>
-                                    <Badge className="bg-emerald-600 text-white">KREDIT</Badge>
+                                    <Badge className="bg-emerald-600 text-white">{t('KREDIT', 'CREDIT')}</Badge>
                                 </div>
                             </CardHeader>
 
@@ -520,8 +519,8 @@ export default function ManagerNeraca({
                                 {/* Liabilitas Lancar */}
                                 <div>
                                     <h3 className="mb-2.5 flex items-center justify-between border-b border-slate-200 pb-1.5 text-xs font-bold tracking-wider text-slate-700 uppercase dark:border-slate-800 dark:text-slate-300">
-                                        <span>I. Liabilitas Jangka Pendek (Current Liabilities)</span>
-                                        <span>Nilai (IDR)</span>
+                                        <span>{t('I. Liabilitas Jangka Pendek (Current Liabilities)', 'I. Current Liabilities')}</span>
+                                        <span>{t('Nilai (IDR)', 'Amount (IDR)')}</span>
                                     </h3>
                                     <div className="space-y-3">
                                         {neraca.pasiva.liabilitas_lancar.map((acc) => (
@@ -549,7 +548,7 @@ export default function ManagerNeraca({
                                         ))}
                                     </div>
                                     <div className="mt-3 flex items-center justify-between rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-                                        <span>Total Liabilitas (Kewajiban)</span>
+                                        <span>{t('Total Liabilitas (Kewajiban)', 'Total Liabilities')}</span>
                                         <span className="font-mono">
                                             {formatCurrency(neraca.pasiva.total_liabilitas)}
                                         </span>
@@ -559,8 +558,8 @@ export default function ManagerNeraca({
                                 {/* Ekuitas */}
                                 <div>
                                     <h3 className="mb-2.5 flex items-center justify-between border-b border-slate-200 pb-1.5 text-xs font-bold tracking-wider text-slate-700 uppercase dark:border-slate-800 dark:text-slate-300">
-                                        <span>II. Ekuitas / Modal (Shareholders&apos; Equity)</span>
-                                        <span>Nilai (IDR)</span>
+                                        <span>{t('II. Ekuitas / Modal (Shareholders\' Equity)', 'II. Shareholders\' Equity')}</span>
+                                        <span>{t('Nilai (IDR)', 'Amount (IDR)')}</span>
                                     </h3>
                                     <div className="space-y-3">
                                         {neraca.pasiva.ekuitas.map((acc) => (
@@ -594,7 +593,7 @@ export default function ManagerNeraca({
                                         ))}
                                     </div>
                                     <div className="mt-3 flex items-center justify-between rounded-lg bg-slate-100 px-3 py-2 text-xs font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
-                                        <span>Total Ekuitas (Modal Bersih)</span>
+                                        <span>{t('Total Ekuitas (Modal Bersih)', 'Total Equity (Net Worth)')}</span>
                                         <span className="font-mono">{formatCurrency(neraca.pasiva.total_ekuitas)}</span>
                                     </div>
                                 </div>
@@ -604,7 +603,7 @@ export default function ManagerNeraca({
                         <div className="border-t-2 border-emerald-600 bg-slate-900 px-5 py-4 text-white">
                             <div className="flex items-center justify-between">
                                 <span className="text-sm font-bold tracking-wider uppercase">
-                                    TOTAL PASIVA (LIABILITAS + EKUITAS)
+                                    {t('TOTAL PASIVA (LIABILITAS + EKUITAS)', 'TOTAL LIABILITIES & EQUITY')}
                                 </span>
                                 <span className="font-mono text-lg font-extrabold text-emerald-300">
                                     {formatCurrency(neraca.pasiva.total_pasiva)}
@@ -620,10 +619,13 @@ export default function ManagerNeraca({
                         <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
                             <div>
                                 <CardTitle className="text-base">
-                                    Rincian Komponen Pembentuk Neraca (Drill-Down Audit)
+                                    {t('Rincian Komponen Pembentuk Neraca (Drill-Down Audit)', 'Balance Sheet Component Breakdown (Audit Drill-Down)')}
                                 </CardTitle>
                                 <CardDescription>
-                                    Telusuri transaksi faktur piutang customer, utang Purchase Order supplier, valuasi stok gudang, dan riwayat pengesahan Neraca.
+                                    {t(
+                                        'Telusuri transaksi faktur piutang customer, utang Purchase Order supplier, valuasi stok gudang, dan riwayat pengesahan Neraca.',
+                                        'Trace customer invoice receivables, supplier PO payables, inventory valuation, and balance sheet validation history.'
+                                    )}
                                 </CardDescription>
                             </div>
                             <div className="flex flex-wrap gap-1.5">
@@ -633,7 +635,7 @@ export default function ManagerNeraca({
                                     onClick={() => setActiveDrilldownTab('receivables')}
                                     className="h-8 text-xs"
                                 >
-                                    Piutang Customer ({drilldown.receivables.length})
+                                    {t('Piutang Customer', 'Customer Receivables')} ({drilldown.receivables.length})
                                 </Button>
                                 <Button
                                     size="sm"
@@ -641,7 +643,7 @@ export default function ManagerNeraca({
                                     onClick={() => setActiveDrilldownTab('payables')}
                                     className="h-8 text-xs"
                                 >
-                                    Utang PO Supplier ({drilldown.payables.length})
+                                    {t('Utang PO Supplier', 'Supplier PO Payables')} ({drilldown.payables.length})
                                 </Button>
                                 <Button
                                     size="sm"
@@ -649,7 +651,15 @@ export default function ManagerNeraca({
                                     onClick={() => setActiveDrilldownTab('inventory')}
                                     className="h-8 text-xs"
                                 >
-                                    Persediaan Gudang ({drilldown.inventory.length})
+                                    {t('Persediaan Gudang', 'Warehouse Inventory')} ({drilldown.inventory.length})
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant={activeDrilldownTab === 'inventory' ? 'default' : 'outline'}
+                                    onClick={() => setActiveDrilldownTab('inventory')}
+                                    className="h-8 text-xs"
+                                >
+                                    {t('Persediaan Gudang', 'Warehouse Inventory')} ({drilldown.inventory.length})
                                 </Button>
                                 <Button
                                     size="sm"
@@ -657,7 +667,7 @@ export default function ManagerNeraca({
                                     onClick={() => setActiveDrilldownTab('submissions')}
                                     className="h-8 text-xs"
                                 >
-                                    Riwayat Pengesahan ({neraca_submissions.length})
+                                    {t('Riwayat Pengesahan', 'Validation History')} ({neraca_submissions.length})
                                 </Button>
                             </div>
                         </div>
@@ -668,17 +678,17 @@ export default function ManagerNeraca({
                             <Table>
                                 <TableHeader className="bg-slate-50">
                                     <TableRow>
-                                        <TableHead>No. Invoice</TableHead>
-                                        <TableHead>Customer</TableHead>
-                                        <TableHead>Tanggal</TableHead>
-                                        <TableHead className="text-right">Nilai Piutang (Utang Customer)</TableHead>
+                                        <TableHead>{t('No. Invoice', 'Invoice No.')}</TableHead>
+                                        <TableHead>{t('Customer', 'Customer')}</TableHead>
+                                        <TableHead>{t('Tanggal', 'Date')}</TableHead>
+                                        <TableHead className="text-right">{t('Nilai Piutang (Utang Customer)', 'Receivable Amount')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {drilldown.receivables.length === 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={4} className="h-24 text-center text-slate-500">
-                                                Tidak ada tagihan piutang customer yang belum lunas.
+                                                {t('Tidak ada tagihan piutang customer yang belum lunas.', 'No outstanding customer receivables.')}
                                             </TableCell>
                                         </TableRow>
                                     ) : (
@@ -703,19 +713,19 @@ export default function ManagerNeraca({
                             <Table>
                                 <TableHeader className="bg-slate-50">
                                     <TableRow>
-                                        <TableHead>No. PO</TableHead>
-                                        <TableHead>Supplier</TableHead>
-                                        <TableHead>Plant</TableHead>
-                                        <TableHead>Tanggal PO</TableHead>
-                                        <TableHead>Status PO</TableHead>
-                                        <TableHead className="text-right">Nilai Utang Usaha</TableHead>
+                                        <TableHead>{t('No. PO', 'PO No.')}</TableHead>
+                                        <TableHead>{t('Supplier', 'Supplier')}</TableHead>
+                                        <TableHead>{t('Plant', 'Plant')}</TableHead>
+                                        <TableHead>{t('Tanggal PO', 'PO Date')}</TableHead>
+                                        <TableHead>{t('Status PO', 'PO Status')}</TableHead>
+                                        <TableHead className="text-right">{t('Nilai Utang Usaha', 'Payable Amount')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {drilldown.payables.length === 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={6} className="h-24 text-center text-slate-500">
-                                                Seluruh Purchase Order yang disetujui telah lunas.
+                                                {t('Seluruh Purchase Order yang disetujui telah lunas.', 'All approved Purchase Orders are fully paid.')}
                                             </TableCell>
                                         </TableRow>
                                     ) : (
@@ -744,12 +754,12 @@ export default function ManagerNeraca({
                             <Table>
                                 <TableHeader className="bg-slate-50">
                                     <TableRow>
-                                        <TableHead>Kode Produk</TableHead>
-                                        <TableHead>Nama Barang</TableHead>
-                                        <TableHead>Lokasi Gudang</TableHead>
-                                        <TableHead className="text-center">Stok Tersedia</TableHead>
-                                        <TableHead className="text-right">Harga Satuan</TableHead>
-                                        <TableHead className="text-right">Total Valuasi Persediaan</TableHead>
+                                        <TableHead>{t('Kode Produk', 'Product Code')}</TableHead>
+                                        <TableHead>{t('Nama Barang', 'Item Name')}</TableHead>
+                                        <TableHead>{t('Lokasi Gudang', 'Warehouse Location')}</TableHead>
+                                        <TableHead className="text-center">{t('Stok Tersedia', 'Available Stock')}</TableHead>
+                                        <TableHead className="text-right">{t('Harga Satuan', 'Unit Price')}</TableHead>
+                                        <TableHead className="text-right">{t('Total Valuasi Persediaan', 'Total Inventory Valuation')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -777,27 +787,27 @@ export default function ManagerNeraca({
                             <Table>
                                 <TableHeader className="bg-slate-50">
                                     <TableRow>
-                                        <TableHead>Periode Neraca</TableHead>
-                                        <TableHead>Diajukan Oleh</TableHead>
-                                        <TableHead>Waktu Pengajuan</TableHead>
-                                        <TableHead>Disahkan Oleh</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Catatan</TableHead>
-                                        <TableHead className="text-right">Aksi</TableHead>
+                                        <TableHead>{t('Periode Neraca', 'Balance Sheet Period')}</TableHead>
+                                        <TableHead>{t('Diajukan Oleh', 'Submitted By')}</TableHead>
+                                        <TableHead>{t('Waktu Pengajuan', 'Submission Time')}</TableHead>
+                                        <TableHead>{t('Disahkan Oleh', 'Validated By')}</TableHead>
+                                        <TableHead>{t('Status', 'Status')}</TableHead>
+                                        <TableHead>{t('Catatan', 'Notes')}</TableHead>
+                                        <TableHead className="text-right">{t('Aksi', 'Action')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {neraca_submissions.length === 0 ? (
                                         <TableRow>
                                             <TableCell colSpan={7} className="h-24 text-center text-slate-500">
-                                                Belum ada riwayat pengajuan pengesahan Neraca.
+                                                {t('Belum ada riwayat pengajuan pengesahan Neraca.', 'No balance sheet validation submissions yet.')}
                                             </TableCell>
                                         </TableRow>
                                     ) : (
                                         neraca_submissions.map((sub) => (
                                             <TableRow key={sub.id}>
                                                 <TableCell className="font-medium">
-                                                    {sub.period_start} s/d {sub.period_end}
+                                                    {sub.period_start} {t('s/d', 'to')} {sub.period_end}
                                                 </TableCell>
                                                 <TableCell className="text-xs">{sub.created_by_name}</TableCell>
                                                 <TableCell className="text-xs text-slate-500">
@@ -809,14 +819,14 @@ export default function ManagerNeraca({
                                                 <TableCell>
                                                     {sub.status === 'validated' ? (
                                                         <Badge className="bg-emerald-600 text-white">
-                                                            Disahkan Manager
+                                                            {t('Disahkan Manager', 'Validated by Manager')}
                                                         </Badge>
                                                     ) : (
                                                         <Badge
                                                             variant="outline"
                                                             className="border-amber-300 bg-amber-50 text-amber-800"
                                                         >
-                                                            Menunggu Validasi
+                                                            {t('Menunggu Validasi', 'Pending Validation')}
                                                         </Badge>
                                                     )}
                                                 </TableCell>
@@ -830,7 +840,7 @@ export default function ManagerNeraca({
                                                             onClick={() => handleValidateNeracaSubmission(sub.id)}
                                                             className="h-7 bg-emerald-600 px-2.5 text-xs text-white hover:bg-emerald-700"
                                                         >
-                                                            Sahkan Neraca
+                                                            {t('Sahkan Neraca', 'Validate Balance Sheet')}
                                                         </Button>
                                                     )}
                                                 </TableCell>

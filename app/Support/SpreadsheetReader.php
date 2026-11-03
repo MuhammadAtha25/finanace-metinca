@@ -524,3 +524,4 @@ class SpreadsheetReader
         return $localParts.$centralParts.$eocd;
     }
 }
+

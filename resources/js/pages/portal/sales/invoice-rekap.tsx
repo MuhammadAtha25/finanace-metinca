@@ -487,7 +487,7 @@ export default function InvoiceRekap({ invoices }: InvoiceRekapProps) {
                             className="gap-1.5 border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100/70 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300"
                         >
                             <FileSpreadsheet className="size-4 text-emerald-600 dark:text-emerald-400" />
-                            Export CSV
+                            {t('Ekspor CSV', 'Export CSV')}
                         </Button>
                         <Button
                             type="button"

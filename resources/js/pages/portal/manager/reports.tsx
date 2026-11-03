@@ -520,7 +520,7 @@ export default function ReportsInbox({ reports }: ReportsProps) {
                                 className="gap-1.5 border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100/70"
                             >
                                 <FileSpreadsheet className="size-4 text-emerald-600" />
-                                {t('Export CSV', 'Export CSV')}
+                                {t('Ekspor CSV', 'Export CSV')}
                             </Button>
                         </div>
                     )}
