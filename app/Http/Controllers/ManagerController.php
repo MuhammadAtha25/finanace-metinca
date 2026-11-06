@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\ManagerReport;
-use App\Models\Product;
 use App\Models\ReturnNote;
 use App\Services\NotificationService;
 use App\Support\UserRole;
@@ -148,73 +147,120 @@ class ManagerController extends Controller
             $periodInput = now()->format('Y-m');
         }
 
-        // All validated invoices (utang & lunas)
-        $invoices = Invoice::with(['order.customer'])
+        // All validated invoices (utang & lunas) for the period, fallback to all if empty
+        $invoices = Invoice::with(['order.customer', 'order.items.product'])
             ->whereIn('status', ['utang', 'lunas'])
+            ->where(function ($q) use ($periodStart, $cutoffDate) {
+                $q->whereBetween('validated_at', [$periodStart, $cutoffDate])
+                  ->orWhere(function ($q2) use ($periodStart, $cutoffDate) {
+                      $q2->whereNull('validated_at')
+                         ->whereBetween('created_at', [$periodStart, $cutoffDate]);
+                  });
+            })
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $paidInvoices = $invoices->where('status', 'lunas');
-        $unpaidInvoices = $invoices->where('status', 'utang');
+        if ($invoices->isEmpty()) {
+            $invoices = Invoice::with(['order.customer', 'order.items.product'])
+                ->whereIn('status', ['utang', 'lunas'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
 
         // Approved returns
         $approvedReturns = ReturnNote::with(['order.customer'])
             ->where('status', 'Approved')
             ->get();
 
-        // Products (Inventory valuation)
-        $products = Product::orderBy('code')->get();
+        // ── SISI 1: NILAI PENJUALAN DITERBITKAN (SALES ISSUED) ────────────────
+        $domesticSubtotal = (float) $invoices->where('invoice_type', 'domestik')->sum('subtotal');
+        $internationalSubtotal = (float) $invoices->where('invoice_type', 'international')->sum('subtotal');
+        $taxTotal = (float) $invoices->sum('tax_amount');
+        $totalSalesIssued = (float) $invoices->sum('total_amount');
 
-        // ── AKTIVA (ASSETS) CALCULATION ────────────────────────────────────────
-        $initialCashCapital = 500000000.0; // Modal Kas Operasional Awal Rp 500.000.000
-        $paidSalesReceipts = (float) $paidInvoices->sum('total_amount');
-        $dpReceipts = (float) $unpaidInvoices->sum('dp_amount');
-        $debitReturnsOutflow = (float) $approvedReturns->where('type', 'debit_external')->sum('total_amount');
+        // ── SISI 2: REALISASI & STATUS PEMBAYARAN PENJUALAN (SETTLEMENT) ───────
+        $paidInvoices = $invoices->where('status', 'lunas');
+        $unpaidInvoices = $invoices->where('status', 'utang');
 
-        $cashAndEquivalents = max(0.0, $initialCashCapital + $paidSalesReceipts + $dpReceipts - $debitReturnsOutflow);
+        $paidSales = (float) $paidInvoices->sum('total_amount');
+        $dpCollected = (float) $unpaidInvoices->sum('dp_amount');
+        $returnsTotal = (float) $approvedReturns->sum('total_amount');
 
-        $grossReceivables = (float) $unpaidInvoices->sum('total_amount');
-        $creditReturnsReduction = (float) $approvedReturns->where('type', 'credit_internal')->sum('total_amount');
-        $accountsReceivable = max(0.0, $grossReceivables - $creditReturnsReduction);
+        // Sisa piutang penjualan (setelah dikurangi DP yang masuk dan kompensasi retur)
+        $remainingReceivables = max(0.0, ((float) $unpaidInvoices->sum('total_amount') - $dpCollected - $returnsTotal));
 
-        $inventoryValue = (float) $products->sum(fn (Product $p) => ((int) $p->stock) * ((float) $p->price));
+        // Total realisasi penjualan: Kas Lunas + DP + Sisa Piutang + Potongan Retur
+        $totalSettlement = $paidSales + $dpCollected + $remainingReceivables + $returnsTotal;
+        $isBalanced = abs($totalSalesIssued - $totalSettlement) < 1;
 
-        $totalCurrentAssets = $cashAndEquivalents + $accountsReceivable + $inventoryValue;
-
-        // Fixed Assets (Peralatan & Mesin Plant Jakarta, Surabaya, Bandung)
-        $fixedAssetsGross = 350000000.0;
-        $accumulatedDepreciation = 35000000.0;
-        $totalFixedAssets = $fixedAssetsGross - $accumulatedDepreciation; // 315.000.000
-
-        $totalAssets = $totalCurrentAssets + $totalFixedAssets;
-
-        // ── PASIVA (LIABILITIES & EQUITY) CALCULATION ─────────────────────────
-        $taxPayablePpn = (float) $invoices->sum('tax_amount');
-        $unearnedDpLiability = $dpReceipts;
-
-        $totalCurrentLiabilities = $taxPayablePpn + $unearnedDpLiability;
-        $longTermLiabilities = 0.0;
-        $totalLiabilities = $totalCurrentLiabilities + $longTermLiabilities;
-
-        // Equity
-        $paidInCapital = $initialCashCapital + $totalFixedAssets; // 815.000.000
-        $operationalInventoryReserve = $inventoryValue;
-        $retainedEarningsAndNetIncome = $totalAssets - $totalLiabilities - ($paidInCapital + $operationalInventoryReserve);
-        $totalEquity = $paidInCapital + $operationalInventoryReserve + $retainedEarningsAndNetIncome;
-
-        $totalLiabilitiesAndEquity = $totalLiabilities + $totalEquity;
-        $isBalanced = abs($totalAssets - $totalLiabilitiesAndEquity) < 1;
-
-        // Financial Ratios for Manager Analysis
-        $currentRatio = $totalCurrentLiabilities > 0
-            ? round($totalCurrentAssets / $totalCurrentLiabilities, 2)
-            : 99.99;
-        $quickRatio = $totalCurrentLiabilities > 0
-            ? round(($cashAndEquivalents + $accountsReceivable) / $totalCurrentLiabilities, 2)
-            : 99.99;
-        $debtToAssetRatio = $totalAssets > 0
-            ? round(($totalLiabilities / $totalAssets) * 100, 1)
+        // Indikator Rasio Kinerja Penjualan
+        $collectionRate = $totalSalesIssued > 0
+            ? round((($paidSales + $dpCollected) / $totalSalesIssued) * 100, 1)
             : 0.0;
+        $receivableRate = $totalSalesIssued > 0
+            ? round(($remainingReceivables / $totalSalesIssued) * 100, 1)
+            : 0.0;
+        $returnRate = $totalSalesIssued > 0
+            ? round(($returnsTotal / $totalSalesIssued) * 100, 1)
+            : 0.0;
+        $domesticShare = $totalSalesIssued > 0
+            ? round((($domesticSubtotal + $taxTotal) / $totalSalesIssued) * 100, 1)
+            : 0.0;
+
+        // Customer Reconciliation breakdown for drilldown
+        $customerSummary = [];
+        foreach ($invoices as $inv) {
+            $cName = $inv->order?->customer?->name ?? 'Customer Umum';
+            if (! isset($customerSummary[$cName])) {
+                $customerSummary[$cName] = [
+                    'customer_name' => $cName,
+                    'invoices_count' => 0,
+                    'total_sales' => 0.0,
+                    'paid_amount' => 0.0,
+                    'dp_amount' => 0.0,
+                    'unpaid_amount' => 0.0,
+                    'returns_amount' => 0.0,
+                ];
+            }
+            $customerSummary[$cName]['invoices_count']++;
+            $customerSummary[$cName]['total_sales'] += (float) $inv->total_amount;
+            if ($inv->status === 'lunas') {
+                $customerSummary[$cName]['paid_amount'] += (float) $inv->total_amount;
+            } else {
+                $customerSummary[$cName]['dp_amount'] += (float) $inv->dp_amount;
+                $customerSummary[$cName]['unpaid_amount'] += max(0.0, ((float) $inv->total_amount - (float) $inv->dp_amount));
+            }
+        }
+        foreach ($approvedReturns as $rtn) {
+            $cName = $rtn->order?->customer?->name ?? 'Customer Umum';
+            if (isset($customerSummary[$cName])) {
+                $customerSummary[$cName]['returns_amount'] += (float) $rtn->total_amount;
+                $customerSummary[$cName]['unpaid_amount'] = max(0.0, $customerSummary[$cName]['unpaid_amount'] - (float) $rtn->total_amount);
+            }
+        }
+        $customerReconciliation = collect($customerSummary)->sortByDesc('total_sales')->values()->all();
+
+        // Receivables Drilldown (daftar invoice utang)
+        $receivablesList = $unpaidInvoices->map(fn (Invoice $inv) => [
+            'invoice_number' => 'INV-' . str_pad((string) $inv->id, 5, '0', STR_PAD_LEFT),
+            'order_id' => $inv->order_id,
+            'customer_name' => $inv->order?->customer?->name ?? 'Customer',
+            'date' => $inv->created_at ? $inv->created_at->format('d M Y') : '-',
+            'due_date' => $inv->due_date ? Carbon::parse($inv->due_date)->format('d M Y') : '-',
+            'total_amount' => (float) $inv->total_amount,
+            'dp_amount' => (float) $inv->dp_amount,
+            'remaining_balance' => max(0.0, ((float) $inv->total_amount - (float) $inv->dp_amount)),
+        ])->values()->all();
+
+        // Returns Drilldown
+        $returnsList = $approvedReturns->map(fn (ReturnNote $rtn) => [
+            'return_number' => 'RTN-' . str_pad((string) $rtn->id, 4, '0', STR_PAD_LEFT),
+            'order_id' => $rtn->order_id,
+            'customer_name' => $rtn->order?->customer?->name ?? '-',
+            'reason' => $rtn->reason ?? '-',
+            'date' => $rtn->created_at ? $rtn->created_at->format('d M Y') : '-',
+            'total_amount' => (float) $rtn->total_amount,
+        ])->values()->all();
 
         // Latest Neraca verification status
         $neracaReports = ManagerReport::with(['creator', 'validator'])
@@ -239,128 +285,84 @@ class ManagerController extends Controller
             'period_label' => $cutoffDate->translatedFormat('F Y'),
             'cutoff_date' => $cutoffDate->format('d M Y'),
             'neraca' => [
-                'aktiva' => [
-                    'lancar' => [
+                'sumber_penjualan' => [
+                    'items' => [
+                        [
+                            'code' => '4101',
+                            'name_id' => 'Penjualan Barang Domestik (DPP)',
+                            'name_en' => 'Domestic Product Sales (Tax Base)',
+                            'description_id' => 'Nilai dasar pengenaan pajak atas faktur penjualan dalam negeri',
+                            'description_en' => 'Subtotal value of domestic commercial sales invoices',
+                            'amount' => $domesticSubtotal,
+                        ],
+                        [
+                            'code' => '4102',
+                            'name_id' => 'Penjualan Ekspor / Internasional',
+                            'name_en' => 'Export / International Sales',
+                            'description_id' => 'Nilai faktur penjualan ekspor luar negeri (tarif PPN 0%)',
+                            'description_en' => 'Subtotal value of foreign export sales invoices (0% VAT)',
+                            'amount' => $internationalSubtotal,
+                        ],
+                        [
+                            'code' => '2101',
+                            'name_id' => 'Pajak PPN Keluaran (11%)',
+                            'name_en' => 'VAT Output (11%)',
+                            'description_id' => 'Akumulasi PPN 11% yang tercantum pada faktur penjualan domestik',
+                            'description_en' => 'Accumulated 11% VAT on domestic commercial invoices',
+                            'amount' => $taxTotal,
+                        ],
+                    ],
+                    'total' => $totalSalesIssued,
+                ],
+                'realisasi_penjualan' => [
+                    'items' => [
                         [
                             'code' => '1101',
-                            'name_id' => 'Kas dan Setara Kas',
-                            'name_en' => 'Cash and Cash Equivalents',
-                            'description_id' => 'Saldo kas operasional awal + pelunasan invoice + uang muka (DP) − retur nota debit',
-                            'description_en' => 'Operating cash + paid invoices + customer DP received − debit returns',
-                            'amount' => $cashAndEquivalents,
+                            'name_id' => 'Penjualan Telah Lunas (Kas Masuk)',
+                            'name_en' => 'Fully Paid Sales (Cash Inflow)',
+                            'description_id' => 'Pembayaran lunas 100% yang telah diterima dari faktur berstatus Lunas',
+                            'description_en' => '100% full payments received for cleared invoices',
+                            'amount' => $paidSales,
                         ],
                         [
                             'code' => '1102',
-                            'name_id' => 'Piutang Usaha Customer (Bersih)',
-                            'name_en' => 'Accounts Receivable (Net)',
-                            'description_id' => 'Tagihan invoice tervalidasi (Utang) dikurangi retur kredit yang disetujui',
-                            'description_en' => 'Validated unpaid invoices minus approved credit returns',
-                            'amount' => $accountsReceivable,
+                            'name_id' => 'Uang Muka Diterima (DP Faktur Berjalan)',
+                            'name_en' => 'Down Payment Received (Active Invoices)',
+                            'description_id' => 'Uang muka pembayaran (DP) yang telah masuk dari faktur yang masih berjalan',
+                            'description_en' => 'Advance customer down payments collected for active orders',
+                            'amount' => $dpCollected,
                         ],
                         [
                             'code' => '1103',
-                            'name_id' => 'Persediaan Barang Dagang (Gudang)',
-                            'name_en' => 'Merchandise Inventory',
-                            'description_id' => 'Valuasi seluruh stok produk yang tersedia di Gudang A, B, dan C',
-                            'description_en' => 'Valuation of all available product stock in warehouses',
-                            'amount' => $inventoryValue,
+                            'name_id' => 'Sisa Piutang Penjualan (Utang Customer)',
+                            'name_en' => 'Outstanding Sales Receivables',
+                            'description_id' => 'Sisa tagihan penjualan yang masih harus ditagihkan kepada pelanggan',
+                            'description_en' => 'Net outstanding balance remaining to be collected from customers',
+                            'amount' => $remainingReceivables,
+                        ],
+                        [
+                            'code' => '4201',
+                            'name_id' => 'Potongan Retur Barang Disetujui',
+                            'name_en' => 'Approved Sales Returns & Allowances',
+                            'description_id' => 'Pengurang nilai penjualan akibat barang reject/rusak yang telah disetujui',
+                            'description_en' => 'Sales deductions from approved returned / defective items',
+                            'amount' => $returnsTotal,
                         ],
                     ],
-                    'total_lancar' => $totalCurrentAssets,
-                    'tetap' => [
-                        [
-                            'code' => '1201',
-                            'name_id' => 'Peralatan, Mesin & Fasilitas Plant',
-                            'name_en' => 'Plant Equipment, Machinery & Facilities',
-                            'description_id' => 'Aset tetap operasional Plant Jakarta, Surabaya, dan Bandung',
-                            'description_en' => 'Fixed operational assets across Jakarta, Surabaya, and Bandung plants',
-                            'amount' => $fixedAssetsGross,
-                        ],
-                        [
-                            'code' => '1202',
-                            'name_id' => 'Akumulasi Penyusutan Aset Tetap',
-                            'name_en' => 'Accumulated Depreciation',
-                            'description_id' => 'Akumulasi penyusutan peralatan dan fasilitas pabrik',
-                            'description_en' => 'Accumulated depreciation of plant equipment and facilities',
-                            'amount' => -$accumulatedDepreciation,
-                        ],
-                    ],
-                    'total_tetap' => $totalFixedAssets,
-                    'total_aktiva' => $totalAssets,
-                ],
-                'pasiva' => [
-                    'liabilitas_lancar' => [
-                        [
-                            'code' => '2101',
-                            'name_id' => 'Utang Pajak PPN Keluaran (11%)',
-                            'name_en' => 'VAT Output Payable (11%)',
-                            'description_id' => 'Akumulasi PPN 11% atas faktur penjualan domestik tervalidasi',
-                            'description_en' => 'Accumulated 11% VAT from validated domestic sales invoices',
-                            'amount' => $taxPayablePpn,
-                        ],
-                        [
-                            'code' => '2102',
-                            'name_id' => 'Pendapatan Diterima di Muka (Down Payment)',
-                            'name_en' => 'Unearned Revenue (Customer Down Payments)',
-                            'description_id' => 'Uang muka (DP) pelanggan atas pesanan yang masih berjalan',
-                            'description_en' => 'Customer down payments on active orders',
-                            'amount' => $unearnedDpLiability,
-                        ],
-                    ],
-                    'total_liabilitas' => $totalLiabilities,
-                    'ekuitas' => [
-                        [
-                            'code' => '3101',
-                            'name_id' => 'Modal Disetor Awal Perusahaan',
-                            'name_en' => 'Paid-in Capital',
-                            'description_id' => 'Modal dasar kas & fasilitas PT. Metinca Prima Industrial Works',
-                            'description_en' => 'Initial cash & facility capital of PT. Metinca Prima Industrial Works',
-                            'amount' => $paidInCapital,
-                        ],
-                        [
-                            'code' => '3102',
-                            'name_id' => 'Cadangan Modal Persediaan Operasional',
-                            'name_en' => 'Operational Inventory Capital Reserve',
-                            'description_id' => 'Cadangan nilai persediaan barang gudang',
-                            'description_en' => 'Warehouse inventory capital reserve',
-                            'amount' => $operationalInventoryReserve,
-                        ],
-                        [
-                            'code' => '3103',
-                            'name_id' => 'Laba / (Rugi) Ditahan & Periode Berjalan',
-                            'name_en' => 'Retained Earnings & Current Period Net Income',
-                            'description_id' => 'Akumulasi surplus/defisit bersih kegiatan operasional penjualan',
-                            'description_en' => 'Net surplus/deficit from sales operations',
-                            'amount' => $retainedEarningsAndNetIncome,
-                        ],
-                    ],
-                    'total_ekuitas' => $totalEquity,
-                    'total_pasiva' => $totalLiabilitiesAndEquity,
+                    'total' => $totalSettlement,
                 ],
                 'is_balanced' => $isBalanced,
                 'ratios' => [
-                    'current_ratio' => $currentRatio,
-                    'quick_ratio' => $quickRatio,
-                    'debt_to_asset_percent' => $debtToAssetRatio,
+                    'collection_rate' => $collectionRate,
+                    'receivable_rate' => $receivableRate,
+                    'return_rate' => $returnRate,
+                    'domestic_share' => $domesticShare,
                 ],
             ],
             'drilldown' => [
-                'receivables' => $unpaidInvoices->map(fn (Invoice $inv) => [
-                    'invoice_number' => 'INV-' . str_pad((string) $inv->id, 5, '0', STR_PAD_LEFT),
-                    'order_id' => $inv->order_id,
-                    'customer_name' => $inv->order?->customer?->name ?? 'Customer',
-                    'date' => $inv->created_at ? $inv->created_at->format('d M Y') : '-',
-                    'amount' => (float) $inv->total_amount,
-                ])->values()->all(),
-                'inventory' => $products->map(fn (Product $p) => [
-                    'code' => $p->code,
-                    'name' => $p->name,
-                    'category' => $p->category,
-                    'stock' => (int) $p->stock,
-                    'unit' => $p->unit,
-                    'price' => (float) $p->price,
-                    'total_value' => (float) (((int) $p->stock) * ((float) $p->price)),
-                ])->values()->all(),
+                'customer_reconciliation' => $customerReconciliation,
+                'receivables' => $receivablesList,
+                'returns' => $returnsList,
             ],
             'neraca_submissions' => $neracaReports,
         ]);
