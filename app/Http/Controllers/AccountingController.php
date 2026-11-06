@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\ManagerReport;
-use App\Models\PurchaseOrder;
 use App\Models\ReturnNote;
 use App\Services\NotificationService;
 use App\Support\UserRole;
@@ -252,10 +251,6 @@ class AccountingController extends Controller
                 ->get();
         }
 
-        $purchaseOrders = PurchaseOrder::with(['supplier', 'plant.branch', 'items.product'])
-            ->whereIn('status', ['Submitted', 'Approved', 'Received'])
-            ->get();
-
         $grossSales = (float) $invoices->sum('subtotal');
         $totalTax = (float) $invoices->sum('tax_amount');
         $totalDp = (float) $invoices->sum('dp_amount');
@@ -266,7 +261,6 @@ class AccountingController extends Controller
         $internationalSales = (float) $invoices->where('invoice_type', 'international')->sum('total_amount');
         $totalReturns = (float) $returns->sum('total_amount');
         $netRevenue = max(0, $totalSales - $totalReturns);
-        $totalPoAmount = (float) $purchaseOrders->sum('total_amount');
 
         // 1. Detailed Invoices List
         $invoicesDetail = $invoices->map(function (Invoice $inv) {
@@ -369,19 +363,6 @@ class AccountingController extends Controller
             'total_amount' => (float) $rtn->total_amount,
         ])->values()->all();
 
-        // 5. Purchase Orders Detail
-        $poDetail = $purchaseOrders->map(fn (PurchaseOrder $po) => [
-            'id' => $po->id,
-            'po_number' => $po->po_number ?: ('PO-2026-' . str_pad((string) $po->id, 3, '0', STR_PAD_LEFT)),
-            'supplier_name' => $po->supplier?->name ?? '-',
-            'plant_name' => $po->plant?->name ?? '-',
-            'date' => $po->date ? $po->date->format('d M Y') : '-',
-            'status' => $po->status,
-            'payment_status' => $po->payment_status ?? 'unpaid',
-            'items_count' => (int) $po->items->sum('quantity'),
-            'total_amount' => (float) $po->total_amount,
-        ])->values()->all();
-
         return [
             'gross_sales' => $grossSales,
             'total_tax' => $totalTax,
@@ -399,13 +380,10 @@ class AccountingController extends Controller
             'domestic_sales' => $domesticSales,
             'international_sales' => $internationalSales,
             'returns_count' => $returns->count(),
-            'po_count' => $purchaseOrders->count(),
-            'total_po_amount' => $totalPoAmount,
             'invoices_detail' => $invoicesDetail,
             'customer_breakdown' => $customerBreakdown,
             'product_breakdown' => $productBreakdown,
             'returns_detail' => $returnsDetail,
-            'purchase_orders_detail' => $poDetail,
         ];
     }
 }

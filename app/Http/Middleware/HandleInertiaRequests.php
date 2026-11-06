@@ -49,7 +49,6 @@ class HandleInertiaRequests extends Middleware
         $sidebarBadges = [
             'accounting_inbox' => 0,
             'manager_reports' => 0,
-            'purchase_orders' => 0,
         ];
 
         if ($user) {
@@ -77,7 +76,6 @@ class HandleInertiaRequests extends Middleware
 
             $sidebarBadges['accounting_inbox'] = Invoice::where('status', 'submitted')->count();
             $sidebarBadges['manager_reports'] = ManagerReport::where('status', 'submitted')->count();
-            $sidebarBadges['purchase_orders'] = PurchaseOrder::where('status', 'Submitted')->count();
         }
 
         return [

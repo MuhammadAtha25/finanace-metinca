@@ -71,15 +71,6 @@ interface ReceivableDrilldown {
     amount: number;
 }
 
-interface PayableDrilldown {
-    po_number: string;
-    supplier_name: string;
-    plant_name: string;
-    date: string;
-    status: string;
-    amount: number;
-}
-
 interface InventoryDrilldown {
     code: string;
     name: string;
@@ -109,7 +100,6 @@ interface Props {
     neraca: NeracaData;
     drilldown: {
         receivables: ReceivableDrilldown[];
-        payables: PayableDrilldown[];
         inventory: InventoryDrilldown[];
     };
     neraca_submissions: NeracaSubmission[];
@@ -135,7 +125,7 @@ export default function ManagerNeraca({
 
     const [selectedPeriod, setSelectedPeriod] = useState(period);
     const [activeDrilldownTab, setActiveDrilldownTab] = useState<
-        'receivables' | 'payables' | 'inventory' | 'submissions'
+        'receivables' | 'inventory' | 'submissions'
     >('receivables');
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -253,8 +243,8 @@ export default function ManagerNeraca({
                         </h1>
                         <p className="mt-1 text-sm text-slate-500">
                             {t(
-                                `Posisi Aktiva (Aset) vs Pasiva (Liabilitas & Ekuitas) per ${cutoff_date} yang dihitung otomatis dari Kas, Piutang Invoice, Persediaan Gudang, dan Utang Purchase Order.`,
-                                `Assets vs Liabilities & Equity position as of ${cutoff_date} calculated automatically from Cash, Receivables, Warehouse Inventory, and PO Payables.`
+                                `Posisi Aktiva (Aset) vs Pasiva (Liabilitas & Ekuitas) per ${cutoff_date} yang dihitung otomatis dari Kas, Piutang Invoice, dan Persediaan Gudang.`,
+                                `Assets vs Liabilities & Equity position as of ${cutoff_date} calculated automatically from Cash, Receivables, and Warehouse Inventory.`
                             )}
                         </p>
                     </div>
@@ -623,8 +613,8 @@ export default function ManagerNeraca({
                                 </CardTitle>
                                 <CardDescription>
                                     {t(
-                                        'Telusuri transaksi faktur piutang customer, utang Purchase Order supplier, valuasi stok gudang, dan riwayat pengesahan Neraca.',
-                                        'Trace customer invoice receivables, supplier PO payables, inventory valuation, and balance sheet validation history.'
+                                        'Telusuri rincian tagihan faktur piutang customer, valuasi stok gudang, dan riwayat pengesahan Neraca.',
+                                        'Trace customer invoice receivables, inventory valuation, and balance sheet validation history.'
                                     )}
                                 </CardDescription>
                             </div>
@@ -636,22 +626,6 @@ export default function ManagerNeraca({
                                     className="h-8 text-xs"
                                 >
                                     {t('Piutang Customer', 'Customer Receivables')} ({drilldown.receivables.length})
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    variant={activeDrilldownTab === 'payables' ? 'default' : 'outline'}
-                                    onClick={() => setActiveDrilldownTab('payables')}
-                                    className="h-8 text-xs"
-                                >
-                                    {t('Utang PO Supplier', 'Supplier PO Payables')} ({drilldown.payables.length})
-                                </Button>
-                                <Button
-                                    size="sm"
-                                    variant={activeDrilldownTab === 'inventory' ? 'default' : 'outline'}
-                                    onClick={() => setActiveDrilldownTab('inventory')}
-                                    className="h-8 text-xs"
-                                >
-                                    {t('Persediaan Gudang', 'Warehouse Inventory')} ({drilldown.inventory.length})
                                 </Button>
                                 <Button
                                     size="sm"
@@ -693,7 +667,7 @@ export default function ManagerNeraca({
                                         </TableRow>
                                     ) : (
                                         drilldown.receivables.map((item, idx) => (
-                                            <TableRow key={idx}>
+                                             <TableRow key={idx}>
                                                 <TableCell className="font-mono text-xs font-bold text-indigo-600">
                                                     {item.invoice_number}
                                                 </TableCell>
@@ -701,47 +675,6 @@ export default function ManagerNeraca({
                                                 <TableCell className="text-xs text-slate-500">{item.date}</TableCell>
                                                 <TableCell className="text-right font-semibold">
                                                     {formatCurrency(item.amount)}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    )}
-                                </TableBody>
-                            </Table>
-                        )}
-
-                        {activeDrilldownTab === 'payables' && (
-                            <Table>
-                                <TableHeader className="bg-slate-50">
-                                    <TableRow>
-                                        <TableHead>{t('No. PO', 'PO No.')}</TableHead>
-                                        <TableHead>{t('Supplier', 'Supplier')}</TableHead>
-                                        <TableHead>{t('Plant', 'Plant')}</TableHead>
-                                        <TableHead>{t('Tanggal PO', 'PO Date')}</TableHead>
-                                        <TableHead>{t('Status PO', 'PO Status')}</TableHead>
-                                        <TableHead className="text-right">{t('Nilai Utang Usaha', 'Payable Amount')}</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {drilldown.payables.length === 0 ? (
-                                        <TableRow>
-                                            <TableCell colSpan={6} className="h-24 text-center text-slate-500">
-                                                {t('Seluruh Purchase Order yang disetujui telah lunas.', 'All approved Purchase Orders are fully paid.')}
-                                            </TableCell>
-                                        </TableRow>
-                                    ) : (
-                                        drilldown.payables.map((po, idx) => (
-                                            <TableRow key={idx}>
-                                                <TableCell className="font-mono text-xs font-bold text-indigo-600">
-                                                    {po.po_number}
-                                                </TableCell>
-                                                <TableCell className="font-medium">{po.supplier_name}</TableCell>
-                                                <TableCell className="text-xs text-slate-500">{po.plant_name}</TableCell>
-                                                <TableCell className="text-xs text-slate-500">{po.date}</TableCell>
-                                                <TableCell>
-                                                    <Badge variant="outline">{po.status}</Badge>
-                                                </TableCell>
-                                                <TableCell className="text-right font-semibold text-rose-700">
-                                                    {formatCurrency(po.amount)}
                                                 </TableCell>
                                             </TableRow>
                                         ))

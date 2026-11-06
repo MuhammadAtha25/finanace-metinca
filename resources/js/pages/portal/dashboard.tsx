@@ -54,8 +54,8 @@ export default function Dashboard({ metrics, chart_data, recent_orders }: Dashbo
                         </h1>
                         <p className="text-muted-foreground text-sm font-medium">
                             {role === 'staff_sales' ? t('Monitor pesanan Anda dan status persetujuan transaksi.', 'Monitor your orders and transaction approval status.') :
-                             role === 'staff_accounting' ? t('Validasi pesanan masuk, kelola Purchase Order, dan awasi rekap penjualan.', 'Validate incoming orders, manage Purchase Orders, and oversee sales recaps.') :
-                             t('Tinjau laporan detail penjualan, validasi Purchase Order, dan pantau Laporan Neraca perusahaan.', 'Review detailed sales reports, validate Purchase Orders, and monitor the company Balance Sheet.')}
+                             role === 'staff_accounting' ? t('Validasi pesanan masuk dan awasi rekap penjualan per customer.', 'Validate incoming orders and oversee customer sales recaps.') :
+                             t('Tinjau laporan detail penjualan dan pantau Laporan Neraca keuangan perusahaan.', 'Review detailed sales reports and monitor the company Balance Sheet.')}
                         </p>
                     </div>
                 </div>

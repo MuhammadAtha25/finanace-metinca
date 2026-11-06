@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Models\ManagerReport;
 use App\Models\Product;
-use App\Models\PurchaseOrder;
 use App\Models\ReturnNote;
 use App\Services\NotificationService;
 use App\Support\UserRole;
@@ -166,23 +165,13 @@ class ManagerController extends Controller
         // Products (Inventory valuation)
         $products = Product::orderBy('code')->get();
 
-        // Purchase Orders (Approved / Received)
-        $purchaseOrders = PurchaseOrder::with(['supplier', 'plant.branch'])
-            ->whereIn('status', ['Approved', 'Received'])
-            ->orderBy('date', 'desc')
-            ->get();
-
-        $paidPos = $purchaseOrders->where('payment_status', 'paid');
-        $unpaidPos = $purchaseOrders->where('payment_status', '!=', 'paid');
-
         // ── AKTIVA (ASSETS) CALCULATION ────────────────────────────────────────
         $initialCashCapital = 500000000.0; // Modal Kas Operasional Awal Rp 500.000.000
         $paidSalesReceipts = (float) $paidInvoices->sum('total_amount');
         $dpReceipts = (float) $unpaidInvoices->sum('dp_amount');
-        $paidPoOutflow = (float) $paidPos->sum('total_amount');
         $debitReturnsOutflow = (float) $approvedReturns->where('type', 'debit_external')->sum('total_amount');
 
-        $cashAndEquivalents = max(0.0, $initialCashCapital + $paidSalesReceipts + $dpReceipts - $paidPoOutflow - $debitReturnsOutflow);
+        $cashAndEquivalents = max(0.0, $initialCashCapital + $paidSalesReceipts + $dpReceipts - $debitReturnsOutflow);
 
         $grossReceivables = (float) $unpaidInvoices->sum('total_amount');
         $creditReturnsReduction = (float) $approvedReturns->where('type', 'credit_internal')->sum('total_amount');
@@ -200,11 +189,10 @@ class ManagerController extends Controller
         $totalAssets = $totalCurrentAssets + $totalFixedAssets;
 
         // ── PASIVA (LIABILITIES & EQUITY) CALCULATION ─────────────────────────
-        $accountsPayablePo = (float) $unpaidPos->sum('total_amount');
         $taxPayablePpn = (float) $invoices->sum('tax_amount');
         $unearnedDpLiability = $dpReceipts;
 
-        $totalCurrentLiabilities = $accountsPayablePo + $taxPayablePpn + $unearnedDpLiability;
+        $totalCurrentLiabilities = $taxPayablePpn + $unearnedDpLiability;
         $longTermLiabilities = 0.0;
         $totalLiabilities = $totalCurrentLiabilities + $longTermLiabilities;
 
@@ -257,8 +245,8 @@ class ManagerController extends Controller
                             'code' => '1101',
                             'name_id' => 'Kas dan Setara Kas',
                             'name_en' => 'Cash and Cash Equivalents',
-                            'description_id' => 'Saldo kas operasional + pelunasan invoice + penerimaan DP − pembayaran PO lunas',
-                            'description_en' => 'Operating cash + paid invoices + DP received − paid POs',
+                            'description_id' => 'Saldo kas operasional awal + pelunasan invoice + uang muka (DP) − retur nota debit',
+                            'description_en' => 'Operating cash + paid invoices + customer DP received − debit returns',
                             'amount' => $cashAndEquivalents,
                         ],
                         [
@@ -304,14 +292,6 @@ class ManagerController extends Controller
                     'liabilitas_lancar' => [
                         [
                             'code' => '2101',
-                            'name_id' => 'Utang Usaha Supplier (Purchase Order)',
-                            'name_en' => 'Accounts Payable (Supplier POs)',
-                            'description_id' => 'Kewajiban pembayaran atas Purchase Order (Approved/Received) yang belum lunas',
-                            'description_en' => 'Outstanding obligations for Approved/Received Purchase Orders',
-                            'amount' => $accountsPayablePo,
-                        ],
-                        [
-                            'code' => '2102',
                             'name_id' => 'Utang Pajak PPN Keluaran (11%)',
                             'name_en' => 'VAT Output Payable (11%)',
                             'description_id' => 'Akumulasi PPN 11% atas faktur penjualan domestik tervalidasi',
@@ -319,7 +299,7 @@ class ManagerController extends Controller
                             'amount' => $taxPayablePpn,
                         ],
                         [
-                            'code' => '2103',
+                            'code' => '2102',
                             'name_id' => 'Pendapatan Diterima di Muka (Down Payment)',
                             'name_en' => 'Unearned Revenue (Customer Down Payments)',
                             'description_id' => 'Uang muka (DP) pelanggan atas pesanan yang masih berjalan',
@@ -349,8 +329,8 @@ class ManagerController extends Controller
                             'code' => '3103',
                             'name_id' => 'Laba / (Rugi) Ditahan & Periode Berjalan',
                             'name_en' => 'Retained Earnings & Current Period Net Income',
-                            'description_id' => 'Akumulasi surplus/defisit bersih kegiatan penjualan & pengadaan PO',
-                            'description_en' => 'Net surplus/deficit from sales and PO procurement operations',
+                            'description_id' => 'Akumulasi surplus/defisit bersih kegiatan operasional penjualan',
+                            'description_en' => 'Net surplus/deficit from sales operations',
                             'amount' => $retainedEarningsAndNetIncome,
                         ],
                     ],
@@ -371,14 +351,6 @@ class ManagerController extends Controller
                     'customer_name' => $inv->order?->customer?->name ?? 'Customer',
                     'date' => $inv->created_at ? $inv->created_at->format('d M Y') : '-',
                     'amount' => (float) $inv->total_amount,
-                ])->values()->all(),
-                'payables' => $unpaidPos->map(fn (PurchaseOrder $po) => [
-                    'po_number' => $po->po_number ?: ('PO-2026-' . str_pad((string) $po->id, 3, '0', STR_PAD_LEFT)),
-                    'supplier_name' => $po->supplier?->name ?? '-',
-                    'plant_name' => $po->plant?->name ?? '-',
-                    'date' => $po->date ? $po->date->format('d M Y') : '-',
-                    'status' => $po->status,
-                    'amount' => (float) $po->total_amount,
                 ])->values()->all(),
                 'inventory' => $products->map(fn (Product $p) => [
                     'code' => $p->code,

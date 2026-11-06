@@ -5,7 +5,6 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ManagerController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReturnController;
 use App\Http\Controllers\SalesPortalController;
@@ -27,13 +26,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('orders', [SalesPortalController::class, 'orders'])->name('orders.index');
         Route::get('customers', [SalesPortalController::class, 'customers'])->name('customers.index');
         Route::get('products', [ProductController::class, 'index'])->name('products.index');
-
-        // Purchase Orders (PO) — accessible by Sales, Accounting, and Manager
-        Route::get('purchase-orders', [PurchaseOrderController::class, 'index'])->name('purchase_orders.index');
-        Route::post('purchase-orders', [PurchaseOrderController::class, 'store'])->name('purchase_orders.store');
-        Route::post('purchase-orders/{id}/submit', [PurchaseOrderController::class, 'submit'])->name('purchase_orders.submit');
-        Route::post('purchase-orders/{id}/receive', [PurchaseOrderController::class, 'receive'])->name('purchase_orders.receive');
-        Route::post('purchase-orders/{id}/pay', [PurchaseOrderController::class, 'pay'])->name('purchase_orders.pay');
 
         Route::get('sales/invoice-rekap', [InvoiceController::class, 'index'])->name('sales.invoice_rekap');
         Route::get('invoices/template', [InvoiceController::class, 'downloadTemplate'])->name('invoices.template');
@@ -91,10 +83,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('manager/reports/{id}/reject', [ManagerController::class, 'rejectReport'])->name('manager.reports.reject');
 
         Route::get('manager/sales-recap', [SalesPortalController::class, 'rekap'])->name('manager.sales_recap');
-
-        // Purchase Order Approval by Manager Accounting
-        Route::post('purchase-orders/{id}/approve', [PurchaseOrderController::class, 'approve'])->name('purchase_orders.approve');
-        Route::post('purchase-orders/{id}/reject', [PurchaseOrderController::class, 'reject'])->name('purchase_orders.reject');
 
         // Neraca validation by Manager Accounting
         Route::post('manager/neraca/{id}/validate', [ManagerController::class, 'validateNeraca'])->name('manager.neraca.validate');

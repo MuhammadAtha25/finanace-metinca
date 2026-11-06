@@ -333,15 +333,6 @@ class SalesPortalSeeder extends Seeder
                 'action_url' => '/manager/reports',
                 'is_read' => false,
             ]);
-            AppNotification::create([
-                'user_id' => $managerUserId,
-                'sender_id' => $salesUserId,
-                'type' => 'po_submitted',
-                'title' => 'Pengajuan Purchase Order Baru (PO-2026-037)',
-                'message' => 'Staff Sales mengajukan Purchase Order PO-2026-037 ke supplier CV. Teknologi Maju senilai Rp 9.300.000 untuk divalidasi.',
-                'action_url' => '/purchase-orders',
-                'is_read' => false,
-            ]);
 
             // For Staff Sales
             AppNotification::create([

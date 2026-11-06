@@ -40,7 +40,7 @@ interface RawNavItem {
     titleEn: string;
     href: string;
     icon: typeof LayoutGrid;
-    badgeKey?: 'accounting_inbox' | 'manager_reports' | 'purchase_orders';
+    badgeKey?: 'accounting_inbox' | 'manager_reports';
     roles?: string[];
 }
 
@@ -80,14 +80,6 @@ const mainNavItemsRaw: RawNavItem[] = [
         icon: ClipboardList,
         badgeKey: 'accounting_inbox',
         roles: ['staff_accounting'],
-    },
-    {
-        titleId: 'Purchase Order (PO)',
-        titleEn: 'Purchase Orders (PO)',
-        href: '/purchase-orders',
-        icon: ShoppingCart,
-        badgeKey: 'purchase_orders',
-        roles: ['staff_sales', 'staff_accounting', 'manager'],
     },
     {
         titleId: 'Riwayat Invoice',

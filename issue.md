@@ -13,7 +13,7 @@ Dokumen ini berisi perencanaan teknis menyeluruh (*implementation plan*) untuk m
 | **ISSUE-02** | Labeling *"Rekapan penjualan per PT"* diubah menjadi *"Rekapan Penjualan per Customer"* | Tinggi | Sidebar Navigation, Halaman Customer Recap, Halaman Sales Recap |
 | **ISSUE-03** | Labeling profile *"Manager User"* diganti dengan yang seharusnya (*"Manager Accounting"*) | Tinggi | `UserSeeder`, Database Users, Komponen `UserInfo`, Header & Dashboard |
 | **ISSUE-04** | Laporan pada Manager Accounting dibuat **laporan lebih detail**, bukan hanya *summary* angka | Tinggi | `AccountingController`, `ManagerController`, Halaman `manager/reports.tsx` |
-| **ISSUE-05** | Tambah menu **Purchase Order (PO)** sama seperti modul ADI | Tinggi | `PurchaseOrderController`, Routes, Sidebar, Halaman CRUD & Approval PO |
+| **ISSUE-05** | Fokus Perekapan Penjualan (Modul PO Pembelian Dikeluarkan dari Scope) | Tinggi | Disesuaikan agar fokus 100% pada penjualan & penagihan invoice sesuai kebutuhan PT |
 | **ISSUE-06** | Penambahan bagian Manajer terkait **Laporan Neraca (Balance Sheet)** | Tinggi | `ManagerController`, Routes, Sidebar, Halaman `manager/neraca.tsx` |
 | **ISSUE-07** | Penyelarasan menyeluruh sesuai revisi dosen hasil Seminar CP (End-to-End Workflow, RBAC, Dokumen & Diagram) | Tinggi | Use Case, ERD, Seeder, Konsistensi Istilah Akuntansi, Feature Tests |
 
@@ -177,14 +177,10 @@ Setiap aksi lintas aktor berikut **wajib** menghasilkan *in-app notification* di
 
 ---
 
-### ISSUE-05: Tambah Menu Purchase Order (PO) Sama Seperti ADI
+### ISSUE-05: Penyesuaian Scope — Fokus Perekapan Penjualan (PO Pembelian Dikeluarkan)
 
-#### 1. Analisis Kondisi Saat Ini
-* Di dalam codebase `finance-metinca` sebenarnya **sudah tersedia fondasi database & model** untuk Purchase Order:
-  * Model: `App\Models\PurchaseOrder`, `App\Models\PurchaseOrderItem`, `App\Models\Supplier`, `App\Models\Branch`, `App\Models\Plant`.
-  * Seeder: `database/seeders/MasterDataSeeder.php` (sudah men-seed data Supplier, Branch, Plant, dan sampel `PurchaseOrder`).
-  * Dokumentasi ERD: `erd.md` (Bagian B: Modul Pembelian / Purchasing).
-* Namun, **belum ada Controller, Route, Menu di Sidebar, maupun Halaman UI (Frontend)** untuk mengelola Purchase Order, serta belum mengadopsi tampilan & fitur lengkap seperti modul Procurement/PO ADI (KPI Status Cards, Filter Status, Search PO/Supplier, Tabel PO dengan Created By & Approved By, Form Create PO dengan item, aksi Approve/Reject/Receive/Pay, dan Export CSV/Print PO).
+* **Keputusan Scope:** Sesuai konfirmasi pengguna, lingkup proyek Capstone ini berfokus murni pada **Perekapan Penjualan & Penagihan Faktur Invoice (Sales Recap & Invoicing)** untuk bagian Penjualan & Akuntansi PT. Metinca Prima Industrial Works.
+* Pengadaan/Pembelian (*Purchase Order / Supplier Procurement*) merupakan wewenang divisi/bagian lain di perusahaan sehingga modul PO tidak diaktifkan pada menu navigasi sistem, route publik ditiadakan, dan pelaporan keuangan serta Neraca difokuskan pada aktivitas penjualan (Kas, Piutang Invoice, Penjualan Domestik/Ekspor, Pajak PPN Keluaran, Uang Muka DP, dan Retur Barang).
 
 #### 2. Rencana Implementasi Modul Purchase Order (PO)
 1. **Penyesuaian Schema Database (`purchase_orders`):**
@@ -280,10 +276,8 @@ Selain 6 poin spesifik di atas, revisi seminar CP menuntut konsistensi penuh ant
   - [x] Bagikan data notifikasi & badge counter melalui `HandleInertiaRequests.php`.
   - [x] Pasang pemicu notifikasi di `InvoiceController`, `AccountingController`, `ManagerController`, `ReturnController`, dan `PurchaseOrderController`.
   - [x] Tambahkan komponen Lonceng Notifikasi (*Notification Bell Popover*) di `app-sidebar-header.tsx`.
-- [x] **Tahap 3 — Modul Menu Purchase Order / PO (ISSUE-05)**
-  - [x] Buat migrasi penyempurnaan tabel `purchase_orders` (`po_number`, `expected_date`, `created_by`, `approved_by`, `notes`, `payment_status`) dan update `MasterDataSeeder.php`.
-  - [x] Buat `PurchaseOrderController.php` (index, store, submit, approve, reject, receive/pay) dan rute di `routes/web.php`.
-  - [x] Buat halaman `resources/js/pages/portal/purchase-orders/index.tsx` (lengkap dengan KPI Cards, Search, Filter Status, Modal Create PO, Detail/Print PO, Approve/Reject, dan Export CSV) serta tambahkan menunya di `app-sidebar.tsx`.
+- [x] **Tahap 3 — Penyesuaian Scope Modul PO & Fokus Penjualan (ISSUE-05)**
+  - [x] Hapus rute PO, item sidebar PO, badge PO, dan drill-down utang PO agar sistem bersih berfokus 100% pada Perekapan Penjualan & Invoicing.
 - [x] **Tahap 4 — Laporan Detail Manager Accounting (ISSUE-04)**
   - [x] Update `AccountingController@generateReport` dan `ManagerController@inbox` untuk menyertakan rincian transaksi invoice, rincian item produk, breakdown per customer, retur, dan ringkasan pajak/DP/piutang.
   - [x] Redesain halaman `resources/js/pages/portal/manager/reports.tsx` menjadi tampilan laporan detail berlapis (Multi-Tab + Tabel Rincian Invoice/Customer/Produk/Retur + Cetak PDF Resmi & Export CSV).

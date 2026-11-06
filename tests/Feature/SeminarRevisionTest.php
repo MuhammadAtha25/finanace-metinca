@@ -9,7 +9,6 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Plant;
 use App\Models\Product;
-use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Support\SpreadsheetReader;
@@ -52,55 +51,10 @@ beforeEach(function () {
     ]);
 });
 
-test('purchase order creation, submission, approval, receiving, and notifications work end-to-end', function () {
-    // 1. Staff Accounting creates and submits a PO
-    $response = $this->actingAs($this->accountingUser)->post('/purchase-orders', [
-        'supplier_id' => $this->supplier->id,
-        'plant_id' => $this->plant->id,
-        'date' => now()->toDateString(),
-        'expected_date' => now()->addDays(7)->toDateString(),
-        'status' => 'Submitted',
-        'notes' => 'Pengadaan Steel Flange Q4',
-        'items' => [
-            [
-                'product_id' => $this->product->id,
-                'quantity' => 10,
-                'unit_price' => 350000,
-            ],
-        ],
-    ]);
-
-    $response->assertRedirect(route('purchase_orders.index'));
-
-    $po = PurchaseOrder::first();
-    expect($po)->not->toBeNull()
-        ->and($po->status)->toBe('Submitted')
-        ->and((float) $po->total_amount)->toBe(3500000.0);
-
-    // Manager Accounting should receive a notification
-    expect(AppNotification::where('user_id', $this->managerUser->id)->where('type', 'po_submitted')->exists())->toBeTrue();
-
-    // 2. Manager Accounting approves the PO
-    $this->actingAs($this->managerUser)
-        ->post("/purchase-orders/{$po->id}/approve")
-        ->assertRedirect();
-
-    $po->refresh();
-    expect($po->status)->toBe('Approved')
-        ->and($po->approved_by)->toBe($this->managerUser->id);
-
-    // Creator should receive approval notification
-    expect(AppNotification::where('user_id', $this->accountingUser->id)->where('type', 'po_approved')->exists())->toBeTrue();
-
-    // 3. Receive PO goods -> increments product stock
+test('purchase orders routes are disabled as the system focuses exclusively on sales recap and invoicing', function () {
     $this->actingAs($this->accountingUser)
-        ->post("/purchase-orders/{$po->id}/receive")
-        ->assertRedirect();
-
-    $po->refresh();
-    $this->product->refresh();
-    expect($po->status)->toBe('Received')
-        ->and($this->product->stock)->toBe(30);
+        ->get('/purchase-orders')
+        ->assertStatus(404);
 });
 
 test('detailed accounting report submission and manager validation trigger notifications', function () {
@@ -151,7 +105,7 @@ test('detailed accounting report submission and manager validation trigger notif
             'invoices_detail',
             'customer_breakdown',
             'product_breakdown',
-            'purchase_orders_detail',
+            'returns_detail',
         ]);
 
     expect(AppNotification::where('user_id', $this->managerUser->id)->where('type', 'report_submitted')->exists())->toBeTrue();

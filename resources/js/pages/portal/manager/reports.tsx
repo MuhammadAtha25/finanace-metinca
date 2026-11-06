@@ -101,18 +101,6 @@ interface ReturnDetailRow {
     total_amount: number;
 }
 
-interface PurchaseOrderDetailRow {
-    id: number;
-    po_number: string;
-    supplier_name: string;
-    plant_name: string;
-    date: string;
-    status: string;
-    payment_status: string;
-    items_count: number;
-    total_amount: number;
-}
-
 interface ReportMetrics {
     gross_sales?: number;
     total_tax?: number;
@@ -130,13 +118,10 @@ interface ReportMetrics {
     domestic_sales?: number;
     international_sales?: number;
     returns_count?: number;
-    po_count?: number;
-    total_po_amount?: number;
     invoices_detail?: DetailedInvoiceRow[];
     customer_breakdown?: CustomerBreakdownRow[];
     product_breakdown?: ProductBreakdownRow[];
     returns_detail?: ReturnDetailRow[];
-    purchase_orders_detail?: PurchaseOrderDetailRow[];
 }
 
 interface ReportItem {
@@ -167,7 +152,7 @@ export default function ReportsInbox({ reports }: ReportsProps) {
     const [selectedReport, setSelectedReport] =
         React.useState<ReportItem | null>(reports[0] ?? null);
     const [activeTab, setActiveTab] = React.useState<
-        'invoices' | 'customers' | 'products' | 'returns_po'
+        'invoices' | 'customers' | 'products' | 'returns'
     >('invoices');
     const [expandedInvoices, setExpandedInvoices] = React.useState<
         Record<number, boolean>
@@ -376,7 +361,7 @@ export default function ReportsInbox({ reports }: ReportsProps) {
                         <img src="/Logo-metinca.webp" alt="Logo Metinca" style="height:48px;width:auto;object-fit:contain;" />
                         <div>
                             <div class="title">PT. METINCA PRIMA INDUSTRIAL WORKS</div>
-                            <div class="subtitle">Laporan Detail Keuangan, Penjualan, Customer & Pengadaan</div>
+                            <div class="subtitle">Laporan Detail Keuangan, Rekap Penjualan, Customer & Retur</div>
                         </div>
                     </div>
                     <div style="text-align:right">
@@ -394,7 +379,7 @@ export default function ReportsInbox({ reports }: ReportsProps) {
                     <div class="box"><div class="box-label">Penjualan Lunas (${m.paid_invoices} Inv)</div><div class="box-val" style="color:#15803d">${formatIdr(m.paid_sales)}</div></div>
                     <div class="box"><div class="box-label">Piutang Customer (${m.unpaid_invoices} Inv)</div><div class="box-val" style="color:#b45309">${formatIdr(m.unpaid_sales)}</div></div>
                     <div class="box"><div class="box-label">Total Retur Disetujui</div><div class="box-val" style="color:#dc2626">${formatIdr(m.total_returns ?? 0)}</div></div>
-                    <div class="box"><div class="box-label">Total Pengadaan PO</div><div class="box-val">${formatIdr(m.total_po_amount ?? 0)}</div></div>
+                    <div class="box"><div class="box-label">Pendapatan Bersih (Net Sales)</div><div class="box-val" style="color:#0f766e">${formatIdr(m.net_revenue ?? (m.total_sales - (m.total_returns ?? 0)))}</div></div>
                 </div>
 
                 <h3>I. Rincian Transaksi Faktur Invoice</h3>
@@ -475,7 +460,6 @@ export default function ReportsInbox({ reports }: ReportsProps) {
     const customerList = m?.customer_breakdown ?? [];
     const productList = m?.product_breakdown ?? [];
     const returnsList = m?.returns_detail ?? [];
-    const poList = m?.purchase_orders_detail ?? [];
 
     return (
         <>
@@ -496,8 +480,8 @@ export default function ReportsInbox({ reports }: ReportsProps) {
                         </h1>
                         <p className="text-muted-foreground text-sm">
                             {t(
-                                'Tinjau rincian lengkap faktur invoice, item produk, rekap per customer, retur, dan pengadaan PO sebelum memvalidasi laporan.',
-                                'Review complete invoice transactions, product items, customer recaps, returns, and POs before validating reports.',
+                                'Tinjau rincian lengkap faktur invoice, item produk, rekap per customer, dan retur barang sebelum memvalidasi laporan.',
+                                'Review complete invoice transactions, product items, customer recaps, and item returns before validating reports.',
                             )}
                         </p>
                     </div>
@@ -997,20 +981,24 @@ export default function ReportsInbox({ reports }: ReportsProps) {
                                     <div className="p-3.5 rounded-lg border bg-muted/20">
                                         <div className="text-[11px] font-semibold uppercase text-muted-foreground">
                                             {t(
-                                                'Total Pengadaan (Purchase Order)',
-                                                'Total PO Procurement',
+                                                'Pendapatan Bersih (Net Sales)',
+                                                'Net Sales Revenue',
                                             )}
                                         </div>
-                                        <div className="text-lg font-bold mt-1">
+                                        <div className="text-lg font-bold mt-1 text-emerald-600">
                                             {formatPrice(
-                                                m.total_po_amount ?? 0,
+                                                m.net_revenue ??
+                                                    Math.max(
+                                                        0,
+                                                        m.total_sales -
+                                                            (m.total_returns ?? 0),
+                                                    ),
                                             )}
                                         </div>
                                         <div className="text-[11px] text-muted-foreground mt-0.5">
-                                            {m.po_count ?? 0}{' '}
                                             {t(
-                                                'Dokumen PO Aktif',
-                                                'Active PO Documents',
+                                                'Total Penjualan − Retur',
+                                                'Gross Sales − Returns',
                                             )}
                                         </div>
                                     </div>
@@ -1078,21 +1066,21 @@ export default function ReportsInbox({ reports }: ReportsProps) {
                                         type="button"
                                         size="sm"
                                         variant={
-                                            activeTab === 'returns_po'
+                                            activeTab === 'returns'
                                                 ? 'default'
                                                 : 'outline'
                                         }
                                         onClick={() =>
-                                            setActiveTab('returns_po')
+                                            setActiveTab('returns')
                                         }
                                         className="gap-1.5 text-xs"
                                     >
-                                        <ShoppingCart className="size-3.5" />
+                                        <Undo2 className="size-3.5" />
                                         {t(
-                                            '4. Rincian Retur & Purchase Order',
-                                            '4. Returns & Purchase Orders',
+                                            '4. Rincian Retur Barang',
+                                            '4. Item Returns Breakdown',
                                         )}{' '}
-                                        ({returnsList.length + poList.length})
+                                        ({returnsList.length})
                                     </Button>
                                 </div>
 
@@ -1528,9 +1516,9 @@ export default function ReportsInbox({ reports }: ReportsProps) {
                                     </div>
                                 )}
 
-                                {/* TAB 4: RETURNS & PURCHASE ORDERS */}
-                                {activeTab === 'returns_po' && (
-                                    <div className="mt-4 grid gap-6 lg:grid-cols-2">
+                                {/* TAB 4: RETURNS */}
+                                {activeTab === 'returns' && (
+                                    <div className="mt-4">
                                         <div className="rounded-md border overflow-hidden">
                                             <div className="bg-muted/40 px-4 py-2.5 border-b font-semibold text-xs uppercase flex items-center gap-2">
                                                 <Undo2 className="size-4 text-rose-500" />
@@ -1549,7 +1537,7 @@ export default function ReportsInbox({ reports }: ReportsProps) {
                                                             Customer
                                                         </TableHead>
                                                         <TableHead>
-                                                            Alasan
+                                                            Alasan Retur
                                                         </TableHead>
                                                         <TableHead className="text-right">
                                                             Nilai Retur
@@ -1586,7 +1574,7 @@ export default function ReportsInbox({ reports }: ReportsProps) {
                                                                         }
                                                                     </div>
                                                                 </TableCell>
-                                                                <TableCell className="text-xs">
+                                                                <TableCell className="text-xs font-medium">
                                                                     {
                                                                         r.customer_name
                                                                     }
@@ -1598,93 +1586,6 @@ export default function ReportsInbox({ reports }: ReportsProps) {
                                                                     -
                                                                     {formatPrice(
                                                                         r.total_amount,
-                                                                    )}
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        ))
-                                                    )}
-                                                </TableBody>
-                                            </Table>
-                                        </div>
-
-                                        <div className="rounded-md border overflow-hidden">
-                                            <div className="bg-muted/40 px-4 py-2.5 border-b font-semibold text-xs uppercase flex items-center gap-2">
-                                                <ShoppingCart className="size-4 text-blue-600" />
-                                                {t(
-                                                    'Rincian Pengadaan Purchase Order (PO)',
-                                                    'Purchase Order (PO) Procurement',
-                                                )}
-                                            </div>
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow>
-                                                        <TableHead>
-                                                            No. PO
-                                                        </TableHead>
-                                                        <TableHead>
-                                                            Supplier & Plant
-                                                        </TableHead>
-                                                        <TableHead>
-                                                            Status
-                                                        </TableHead>
-                                                        <TableHead className="text-right">
-                                                            Nilai PO
-                                                        </TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {poList.length === 0 ? (
-                                                        <TableRow>
-                                                            <TableCell
-                                                                colSpan={4}
-                                                                className="h-20 text-center text-xs text-muted-foreground"
-                                                            >
-                                                                Tidak ada PO
-                                                                pada periode
-                                                                ini.
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    ) : (
-                                                        poList.map((po) => (
-                                                            <TableRow
-                                                                key={po.id}
-                                                            >
-                                                                <TableCell className="text-xs font-bold text-blue-600">
-                                                                    {
-                                                                        po.po_number
-                                                                    }
-                                                                </TableCell>
-                                                                <TableCell className="text-xs">
-                                                                    <div className="font-semibold">
-                                                                        {
-                                                                            po.supplier_name
-                                                                        }
-                                                                    </div>
-                                                                    <div className="text-muted-foreground">
-                                                                        {
-                                                                            po.plant_name
-                                                                        }
-                                                                    </div>
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Badge
-                                                                        variant="outline"
-                                                                        className="text-[10px]"
-                                                                    >
-                                                                        {
-                                                                            po.status
-                                                                        }{' '}
-                                                                        (
-                                                                        {po.payment_status ===
-                                                                        'paid'
-                                                                            ? 'Lunas'
-                                                                            : 'Utang'}
-                                                                        )
-                                                                    </Badge>
-                                                                </TableCell>
-                                                                <TableCell className="text-right text-xs font-bold">
-                                                                    {formatPrice(
-                                                                        po.total_amount,
                                                                     )}
                                                                 </TableCell>
                                                             </TableRow>
