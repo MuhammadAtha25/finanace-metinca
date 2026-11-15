@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Plant;
 use App\Models\Product;
+use App\Models\ReturnNote;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Support\SpreadsheetReader;
@@ -241,5 +242,74 @@ test('excel invoice import saves automatically to database and prevents duplicat
 
     $dupResponse->assertSessionHas('error');
     expect(Invoice::count())->toBe(2); // Count remains 2, no duplicate inserted!
+});
+
+test('customer recap report returns detailed invoice breakdown, items, return deductions, and customer summaries', function () {
+    $order = Order::create([
+        'id' => 'ORD-RECAP-001',
+        'customer_id' => $this->customer->id,
+        'user_id' => $this->salesUser->id,
+        'sales_rep' => $this->salesUser->name,
+        'date_raised' => now()->subDays(10)->toDateString(),
+        'status' => 'utang',
+        'terms' => 'Net 30',
+        'currency' => 'IDR',
+        'exchange_rate' => 1,
+        'subtotal' => 5000000,
+        'tax_amount' => 550000,
+        'total_amount' => 5550000,
+        'validated_at' => now()->subDays(9),
+    ]);
+
+    OrderItem::create([
+        'order_id' => $order->id,
+        'product_id' => $this->product->id,
+        'quantity' => 10,
+        'price' => 500000,
+    ]);
+
+    $invoice = Invoice::create([
+        'order_id' => $order->id,
+        'invoice_type' => 'domestik',
+        'currency' => 'IDR',
+        'exchange_rate' => 1,
+        'subtotal' => 5000000,
+        'tax_percent' => 11,
+        'tax_amount' => 550000,
+        'dp_amount' => 1000000,
+        'total_amount' => 5550000,
+        'status' => 'utang',
+        'due_date' => now()->subDays(2)->toDateString(),
+        'validated_at' => now()->subDays(9),
+    ]);
+
+    ReturnNote::create([
+        'order_id' => $order->id,
+        'type' => 'credit_internal',
+        'status' => 'Approved',
+        'total_amount' => 550000,
+        'reason' => 'Barang penyok',
+        'date' => now()->subDays(5)->toDateString(),
+    ]);
+
+    $response = $this->actingAs($this->accountingUser)
+        ->get('/reports/customer-recap');
+
+    $response->assertStatus(200)
+        ->assertInertia(fn ($page) => $page
+            ->component('portal/reports/customer-recap')
+            ->where('selectedCustomerId', 'all')
+            ->has('customers', 1)
+            ->has('customerSummaries', 1)
+            ->has('invoices', 1)
+            ->has('invoices.0.items', 1)
+            ->has('invoices.0.returns', 1)
+            ->where('invoices.0.id', $invoice->id)
+            ->where('invoices.0.invoice_number', 'INV-' . str_pad((string) $invoice->id, 5, '0', STR_PAD_LEFT))
+            ->where('invoices.0.order_id', 'ORD-RECAP-001')
+            ->where('invoices.0.return_amount', 550000)
+            ->where('invoices.0.remaining_balance', 4000000)
+            ->where('invoices.0.days_late', 2)
+        );
 });
 
