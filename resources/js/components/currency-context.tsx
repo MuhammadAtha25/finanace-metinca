@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-type Currency = 'USD' | 'IDR' | 'EUR';
+type Currency = 'USD' | 'IDR' | 'EUR' | 'GBP';
 
 interface CurrencyContextType {
     currency: Currency;
@@ -14,6 +14,7 @@ const CurrencyContext = React.createContext<CurrencyContextType | undefined>(und
 
 const EXCHANGE_RATE_IDR = 16000; // 1 USD = 16,000 IDR
 const EXCHANGE_RATE_EUR = 0.92;  // 1 USD = 0.92 EUR
+const EXCHANGE_RATE_GBP = 0.78;  // 1 USD = 0.78 GBP
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     const [currency, setCurrencyState] = React.useState<Currency>(() => {
@@ -39,6 +40,8 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
             return amount * EXCHANGE_RATE_IDR;
         } else if (currency === 'EUR') {
             return (amount / EXCHANGE_RATE_EUR) * EXCHANGE_RATE_IDR;
+        } else if (currency === 'GBP') {
+            return (amount / EXCHANGE_RATE_GBP) * EXCHANGE_RATE_IDR;
         }
         return amount;
     };
@@ -48,6 +51,8 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
             return amount / EXCHANGE_RATE_IDR;
         } else if (currency === 'EUR') {
             return (amount / EXCHANGE_RATE_IDR) * EXCHANGE_RATE_EUR;
+        } else if (currency === 'GBP') {
+            return (amount / EXCHANGE_RATE_IDR) * EXCHANGE_RATE_GBP;
         }
         return amount;
     };
@@ -71,6 +76,15 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             }).format(eurAmount);
+        } else if (currency === 'GBP') {
+            const gbpAmount = (amountInIdr / EXCHANGE_RATE_IDR) * EXCHANGE_RATE_GBP;
+
+            return new Intl.NumberFormat('en-GB', {
+                style: 'currency',
+                currency: 'GBP',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(gbpAmount);
         }
 
         return new Intl.NumberFormat('id-ID', {

@@ -254,10 +254,10 @@ export function AppSidebar() {
                     <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
                         <Globe className="size-3" /> {t('Mata Uang', 'Currency')}
                     </span>
-                    <div className="flex bg-muted p-0.5 rounded-md text-xs">
+                    <div className="grid grid-cols-2 gap-0.5 bg-muted p-0.5 rounded-md text-xs">
                         <button
                             onClick={() => setCurrency('USD')}
-                            className={`flex-1 py-1 rounded-sm text-center font-medium transition-all ${
+                            className={`py-1 rounded-sm text-center font-medium transition-all ${
                                 currency === 'USD'
                                     ? 'bg-background text-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'
@@ -267,7 +267,7 @@ export function AppSidebar() {
                         </button>
                         <button
                             onClick={() => setCurrency('EUR')}
-                            className={`flex-1 py-1 rounded-sm text-center font-medium transition-all ${
+                            className={`py-1 rounded-sm text-center font-medium transition-all ${
                                 currency === 'EUR'
                                     ? 'bg-background text-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'
@@ -276,8 +276,18 @@ export function AppSidebar() {
                             EUR (€)
                         </button>
                         <button
+                            onClick={() => setCurrency('GBP')}
+                            className={`py-1 rounded-sm text-center font-medium transition-all ${
+                                currency === 'GBP'
+                                    ? 'bg-background text-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground'
+                            }`}
+                        >
+                            GBP (£)
+                        </button>
+                        <button
                             onClick={() => setCurrency('IDR')}
-                            className={`flex-1 py-1 rounded-sm text-center font-medium transition-all ${
+                            className={`py-1 rounded-sm text-center font-medium transition-all ${
                                 currency === 'IDR'
                                     ? 'bg-background text-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground'

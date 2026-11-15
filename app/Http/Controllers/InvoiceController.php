@@ -89,7 +89,7 @@ class InvoiceController extends Controller
         $request->validate([
             'customerId' => 'required|exists:customers,id',
             'invoice_type' => 'required|in:domestik,international',
-            'currency' => 'nullable|string|in:IDR,EUR,USD',
+            'currency' => 'nullable|string|in:IDR,EUR,USD,GBP',
             'exchangeRate' => 'nullable|numeric|min:0.000001',
             'items' => 'required|array|min:1',
             'items.*.productId' => 'required|exists:products,id',
@@ -527,7 +527,7 @@ class InvoiceController extends Controller
             $invoiceType = in_array($typeRaw, ['international', 'internasional', 'ekspor', 'export'], true) ? 'international' : 'domestik';
 
             $currency = strtoupper(trim((string) ($row['mata_uang'] ?? $row['mata_uang_idr_usd_eur'] ?? $row['currency'] ?? $row['valuta'] ?? ($invoiceType === 'international' ? 'USD' : 'IDR'))));
-            if (! in_array($currency, ['IDR', 'USD', 'EUR'], true)) {
+            if (! in_array($currency, ['IDR', 'USD', 'EUR', 'GBP'], true)) {
                 $currency = 'IDR';
             }
 

@@ -140,6 +140,11 @@ export default function InvoiceRekap({ invoices }: InvoiceRekapProps) {
                 style: 'currency',
                 currency: 'EUR',
             }).format(amount);
+        } else if (currencyCode === 'GBP') {
+            return new Intl.NumberFormat('en-GB', {
+                style: 'currency',
+                currency: 'GBP',
+            }).format(amount);
         }
         return new Intl.NumberFormat('id-ID', {
             style: 'currency',

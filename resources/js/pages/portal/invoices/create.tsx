@@ -355,7 +355,7 @@ export default function CreateInvoice({
                         ref: ref || `AUTO-${Object.keys(groupsMap).length + 1}`,
                         customerName: customerName || 'Customer Umum',
                         invoiceType,
-                        currency: ['IDR', 'USD', 'EUR'].includes(currency) ? currency : 'IDR',
+                        currency: ['IDR', 'USD', 'EUR', 'GBP'].includes(currency) ? currency : 'IDR',
                         exchangeRate,
                         taxPercent,
                         dpAmount,
@@ -901,6 +901,7 @@ export default function CreateInvoice({
                                         <SelectContent>
                                             <SelectItem value="IDR">IDR (Rupiah)</SelectItem>
                                             <SelectItem value="EUR">EUR (Euro)</SelectItem>
+                                            <SelectItem value="GBP">GBP (Pound Sterling)</SelectItem>
                                             <SelectItem value="USD">USD (US Dollar)</SelectItem>
                                         </SelectContent>
                                     </Select>
