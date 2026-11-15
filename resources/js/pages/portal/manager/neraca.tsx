@@ -415,7 +415,7 @@ export default function ManagerNeraca({
                                     </div>
                                 </div>
                                 <Badge className="bg-indigo-600 text-xs font-semibold text-white hover:bg-indigo-700">
-                                    {t('Hak Tagih', 'Total Claim')}
+                                    {t('Nilai Faktur', 'Invoiced Sales')}
                                 </Badge>
                             </div>
                         </CardHeader>
