@@ -68,7 +68,7 @@ class ManagerController extends Controller
 
         $senderName = $request->user()?->name ?? 'Manager Accounting';
         $periodLabel = $report->period_start->format('d M Y') . ' - ' . $report->period_end->format('d M Y');
-        $typeLabel = $report->type === 'monthly' ? 'Bulanan' : ($report->type === 'neraca' ? 'Neraca' : 'Tahunan');
+        $typeLabel = $report->type === 'monthly' ? 'Bulanan' : ($report->type === 'neraca' ? 'Keuangan Penjualan' : 'Tahunan');
 
         if ($report->created_by) {
             NotificationService::notifyUser(
@@ -110,7 +110,7 @@ class ManagerController extends Controller
 
         $senderName = $request->user()?->name ?? 'Manager Accounting';
         $periodLabel = $report->period_start->format('d M Y') . ' - ' . $report->period_end->format('d M Y');
-        $typeLabel = $report->type === 'monthly' ? 'Bulanan' : ($report->type === 'neraca' ? 'Neraca' : 'Tahunan');
+        $typeLabel = $report->type === 'monthly' ? 'Bulanan' : ($report->type === 'neraca' ? 'Keuangan Penjualan' : 'Tahunan');
 
         if ($report->created_by) {
             NotificationService::notifyUser(
@@ -388,14 +388,14 @@ class ManagerController extends Controller
         $senderName = $request->user()?->name ?? 'Staff Accounting';
         NotificationService::notifyRole(
             UserRole::MANAGER,
-            'Laporan Neraca Diajukan untuk Validasi',
-            $senderName . ' mengirimkan Laporan Neraca posisi ' . $end->format('d M Y') . ' untuk diperiksa dan disahkan oleh Manager Accounting.',
+            'Laporan Keuangan Penjualan Diajukan untuk Validasi',
+            $senderName . ' mengirimkan Laporan Keuangan Penjualan posisi ' . $end->format('d M Y') . ' untuk diperiksa dan disahkan oleh Manager Accounting.',
             '/manager/neraca',
             'neraca_submitted',
             Auth::id()
         );
 
-        return redirect()->back()->with('success', 'Laporan Neraca berhasil dikirim ke Manager Accounting untuk divalidasi.');
+        return redirect()->back()->with('success', 'Laporan Keuangan Penjualan berhasil dikirim ke Manager Accounting untuk divalidasi.');
     }
 
     public function validateNeraca(Request $request, $id)
@@ -405,15 +405,15 @@ class ManagerController extends Controller
             'status' => 'validated',
             'validated_at' => now(),
             'validated_by' => Auth::id(),
-            'validation_notes' => $request->input('notes', 'Neraca telah diperiksa dan disahkan oleh Manager Accounting.'),
+            'validation_notes' => $request->input('notes', 'Laporan Keuangan Penjualan telah diperiksa dan disahkan oleh Manager Accounting.'),
         ]);
 
         $senderName = $request->user()?->name ?? 'Manager Accounting';
         if ($report->created_by) {
             NotificationService::notifyUser(
                 $report->created_by,
-                'Laporan Neraca Disahkan Manager',
-                $senderName . ' telah mengesahkan Laporan Neraca periode ' . $report->period_end->format('M Y') . '.',
+                'Laporan Keuangan Penjualan Disahkan Manager',
+                $senderName . ' telah mengesahkan Laporan Keuangan Penjualan periode ' . $report->period_end->format('M Y') . '.',
                 '/manager/neraca',
                 'neraca_validated',
                 Auth::id()
@@ -422,13 +422,13 @@ class ManagerController extends Controller
 
         NotificationService::notifyRole(
             UserRole::ACCOUNTING,
-            'Laporan Neraca Disahkan Manager',
-            $senderName . ' telah mengesahkan Laporan Neraca periode ' . $report->period_end->format('M Y') . '.',
+            'Laporan Keuangan Penjualan Disahkan Manager',
+            $senderName . ' telah mengesahkan Laporan Keuangan Penjualan periode ' . $report->period_end->format('M Y') . '.',
             '/manager/neraca',
             'neraca_validated',
             Auth::id()
         );
 
-        return redirect()->back()->with('success', 'Laporan Neraca berhasil divalidasi dan disahkan.');
+        return redirect()->back()->with('success', 'Laporan Keuangan Penjualan berhasil divalidasi dan disahkan.');
     }
 }

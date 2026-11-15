@@ -599,8 +599,8 @@ export default function ReportsInbox({ reports }: ReportsProps) {
                                                       )
                                                     : rep.type === 'neraca'
                                                       ? t(
-                                                            'Laporan Neraca',
-                                                            'Balance Sheet',
+                                                            'Laporan Keuangan Penjualan',
+                                                            'Sales Financial Report',
                                                         )
                                                       : t(
                                                             'Laporan Tahunan',

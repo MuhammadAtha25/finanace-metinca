@@ -60,8 +60,8 @@ const mainNavItemsRaw: RawNavItem[] = [
         roles: ['manager'],
     },
     {
-        titleId: 'Neraca Penjualan',
-        titleEn: 'Sales Balance Sheet',
+        titleId: 'Laporan Keuangan Penjualan',
+        titleEn: 'Sales Financial Report',
         href: '/manager/neraca',
         icon: Scale,
         roles: ['manager', 'staff_accounting'],

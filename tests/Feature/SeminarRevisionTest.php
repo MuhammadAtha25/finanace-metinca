@@ -120,7 +120,7 @@ test('detailed accounting report submission and manager validation trigger notif
     expect(AppNotification::where('user_id', $this->accountingUser->id)->where('type', 'report_validated')->exists())->toBeTrue();
 });
 
-test('sales balance sheet (neraca penjualan) page renders balanced sales issued and settlement', function () {
+test('sales financial report (laporan keuangan penjualan) page renders balanced sales issued and settlement', function () {
     $response = $this->actingAs($this->managerUser)->get('/manager/neraca');
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
@@ -130,7 +130,7 @@ test('sales balance sheet (neraca penjualan) page renders balanced sales issued 
         ->where('neraca.is_balanced', true)
     );
 
-    // Staff Accounting can submit Neraca for Manager validation
+    // Staff Accounting can submit Sales Financial Report for Manager validation
     $this->actingAs($this->accountingUser)
         ->post('/manager/neraca/submit', ['period' => now()->format('Y-m')])
         ->assertRedirect();

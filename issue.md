@@ -14,7 +14,7 @@ Dokumen ini berisi perencanaan teknis menyeluruh (*implementation plan*) untuk m
 | **ISSUE-03** | Labeling profile *"Manager User"* diganti dengan yang seharusnya (*"Manager Accounting"*) | Tinggi | `UserSeeder`, Database Users, Komponen `UserInfo`, Header & Dashboard |
 | **ISSUE-04** | Laporan pada Manager Accounting dibuat **laporan lebih detail**, bukan hanya *summary* angka | Tinggi | `AccountingController`, `ManagerController`, Halaman `manager/reports.tsx` |
 | **ISSUE-05** | Fokus Perekapan Penjualan (Modul PO Pembelian Dikeluarkan dari Scope) | Tinggi | Disesuaikan agar fokus 100% pada penjualan & penagihan invoice sesuai kebutuhan PT |
-| **ISSUE-06** | Penambahan bagian Manajer terkait **Laporan Neraca (Balance Sheet)** | Tinggi | `ManagerController`, Routes, Sidebar, Halaman `manager/neraca.tsx` |
+| **ISSUE-06** | Penambahan bagian Manajer terkait **Laporan Keuangan Penjualan** (*Sales Financial & Reconciliation Report*) | Tinggi | `ManagerController`, Routes, Sidebar, Halaman `manager/neraca.tsx` |
 | **ISSUE-07** | Penyelarasan menyeluruh sesuai revisi dosen hasil Seminar CP (End-to-End Workflow, RBAC, Dokumen & Diagram) | Tinggi | Use Case, ERD, Seeder, Konsistensi Istilah Akuntansi, Feature Tests |
 
 ---
@@ -203,36 +203,33 @@ Setiap aksi lintas aktor berikut **wajib** menghasilkan *in-app notification* di
 
 ---
 
-### ISSUE-06: Penambahan Bagian Manajer Terkait Neraca (Balance Sheet)
+### ISSUE-06: Penambahan Bagian Manajer Terkait Laporan Keuangan Penjualan
 
-#### 1. Analisis Kondisi Saat Ini
-* `Manager Accounting` saat ini hanya memiliki menu `Inbox Laporan` dan `Rekap Penjualan Valid`.
-* Belum ada halaman **Laporan Neraca (Balance Sheet)** yang menyajikan posisi keuangan perusahaan (Aktiva/Aset vs Pasiva/Liabilitas & Ekuitas) kepada Manager Accounting.
+#### 1. Analisis & Penyesuaian Terminologi Akuntansi
+* `Manager Accounting` membutuhkan ringkasan posisi keuangan khusus aktivitas penjualan dan penagihan.
+* Sesuai batasan *scope* sistem yang berfokus murni pada **Perekapan Penjualan & Penagihan Invoice** (bukan akuntansi umum satu entitas perusahaan beserta aset tetap/utang supplier), istilahnya disesuaikan menjadi **Laporan Keuangan Penjualan (*Sales Financial Report*)** agar akurat secara standar akuntansi (PSAK).
 
-#### 2. Desain Perhitungan Akuntansi Neraca (Terintegrasi Data Aplikasi)
-Dengan adanya modul **Invoice Penjualan**, **Retur Barang**, **Produk/Inventaris**, dan **Purchase Order (PO)**, sistem dapat menyusun **Neraca Keuangan (Balance Sheet)** secara otomatis dan *real-time* berdasarkan periode tanggal (*cut-off*):
+#### 2. Desain Perhitungan Rekonsiliasi Keuangan Penjualan (Terintegrasi Data Aplikasi)
+Sistem menyeimbangkan **Nilai Penjualan Diterbitkan** terhadap **Realisasi & Status Pembayarannya** secara *real-time* berdasarkan periode tanggal (*cut-off*):
 
-| Kelompok Neraca | Akun / Komponen | Sumber Perhitungan Otomatis dari Database |
+| Sisi Laporan | Akun / Komponen | Sumber Perhitungan Otomatis dari Database |
 | :--- | :--- | :--- |
-| **AKTIVA (ASET LANCAR)** | **1101 - Kas & Setara Kas** | Saldo Awal Kas + Total Invoice `lunas` + Total `dp_amount` masuk $-$ Total `PurchaseOrder` yang sudah dibayar (`paid`) |
-| **AKTIVA (ASET LANCAR)** | **1102 - Piutang Usaha (Accounts Receivable)** | Total nilai `Invoice` tervalidasi berstatus `utang` $-$ `ReturnNote` (`Approved`) |
-| **AKTIVA (ASET LANCAR)** | **1103 - Persediaan Barang Dagang (Inventory)** | Akumulasi nilai stok produk di gudang ($\sum \text{products.stock} \times \text{products.price}$) |
-| **AKTIVA (ASET TETAP)** | **1201 - Aset Tetap & Inventaris Pabrik (Plant)** | Nilai aset tetap operasional per Plant/Cabang (dikurangi akumulasi penyusutan) |
-| **PASIVA (LIABILITAS JANGKA PENDEK)** | **2101 - Utang Usaha / PO Supplier (Accounts Payable)** | Total nilai `PurchaseOrder` berstatus `Approved` / `Received` yang belum dibayar ke Supplier |
-| **PASIVA (LIABILITAS JANGKA PENDEK)** | **2102 - Utang Pajak PPN (Tax Payable)** | Akumulasi `tax_amount` (PPN 11%) dari `Invoice` yang telah tervalidasi |
-| **PASIVA (LIABILITAS JANGKA PENDEK)** | **2103 - Pendapatan Diterima di Muka (DP)** | Nilai uang muka (`dp_amount`) atas pesanan yang masih berjalan |
-| **PASIVA (EKUITAS / MODAL)** | **3101 - Modal Disetor / Ekuitas Awal** | Saldo penyeimbang modal awal operasional perusahaan |
-| **PASIVA (EKUITAS / MODAL)** | **3102 - Laba Bersih Periode Berjalan** | Pendapatan Penjualan Bersih $-$ Retur $-$ Beban Pembelian PO / HPP |
+| **SISI 1: NILAI PENJUALAN DITERBITKAN** | **4101 - Penjualan Domestik (DPP)** | Total `subtotal` dari seluruh `Invoice` domestik tervalidasi |
+| **SISI 1: NILAI PENJUALAN DITERBITKAN** | **4102 - Penjualan Ekspor / Internasional** | Total `subtotal` dari seluruh `Invoice` ekspor/internasional tervalidasi |
+| **SISI 1: NILAI PENJUALAN DITERBITKAN** | **2101 - Pajak PPN Keluaran (11%)** | Total `tax_amount` dari faktur penjualan domestik |
+| **SISI 2: REALISASI & PEMBAYARAN** | **1101 - Penjualan Telah Lunas (Kas Masuk)** | Total `total_amount` dari `Invoice` berstatus `lunas` |
+| **SISI 2: REALISASI & PEMBAYARAN** | **1102 - Uang Muka Diterima (DP)** | Total `dp_amount` yang masuk dari `Invoice` berstatus `utang` |
+| **SISI 2: REALISASI & PEMBAYARAN** | **1103 - Sisa Piutang Penjualan** | Sisa tagihan `Invoice` berstatus `utang` setelah dikurangi DP & Retur |
+| **SISI 2: REALISASI & PEMBAYARAN** | **4201 - Potongan Retur Barang Disetujui** | Total nilai `ReturnNote` berstatus `Approved` |
 
-$$\text{Total Aktiva (Aset Lancar + Aset Tetap)} = \text{Total Pasiva (Total Liabilitas + Total Ekuitas)}$$
+$$\text{Total Penjualan Diterbitkan (Sisi 1)} = \text{Total Realisasi \& Status Pembayaran (Sisi 2)}$$
 
-#### 3. Rencana Implementasi
+#### 3. Implementasi
 1. **Backend (`ManagerController@neraca` & Route):**
-   * Tambahkan route `GET /manager/neraca` (dapat diakses oleh `manager` dan `staff_accounting`).
-   * Buat method `neraca(Request $request)` di `ManagerController` dengan filter Periode (`bulan`, `tahun`, atau tanggal *cut-off*) dan Cabang/Plant.
-   * Hitung seluruh pos **Aktiva** dan **Pasiva** secara akurat serta sertakan rincian *drill-down* (daftar invoice pembentuk Piutang Usaha, daftar PO pembentuk Utang Usaha, dan daftar produk pembentuk Persediaan).
+   * Route `GET /manager/neraca`, `POST /manager/neraca/submit`, dan `POST /manager/neraca/{id}/validate` dengan parameter periode *cut-off*.
+   * Menyajikan metrik rasio kinerja penagihan (*Collection Rate*, *Receivable Rate*, *Return Rate*) dan *drill-down* per customer, daftar piutang, serta retur barang.
 2. **Menu Sidebar (`resources/js/components/app-sidebar.tsx`):**
-   * Tambahkan menu **Laporan Neraca** (`Balance Sheet`) dengan ikon `Scale` / `BarChart3` pada role `manager` (dan `staff_accounting`).
+   * Menu **Laporan Keuangan Penjualan** (*Sales Financial Report*) pada role `manager` dan `staff_accounting`.
 3. **Frontend UI (`resources/js/pages/portal/manager/neraca.tsx`):**
    * **Header & Filter Periode:** Pilihan Bulan/Tahun & tombol **Cetak Neraca (PDF Resmi)** serta **Export Excel/CSV**.
    * **Status Keseimbangan Neraca (*Balance Check Banner*):** Indikator hijau **"NERACA SEIMBANG (BALANCED)"** yang menampilkan `Total Aktiva = Total Pasiva` beserta rasio likuiditas (*Current Ratio*).
@@ -281,9 +278,9 @@ Selain 6 poin spesifik di atas, revisi seminar CP menuntut konsistensi penuh ant
 - [x] **Tahap 4 — Laporan Detail Manager Accounting (ISSUE-04)**
   - [x] Update `AccountingController@generateReport` dan `ManagerController@inbox` untuk menyertakan rincian transaksi invoice, rincian item produk, breakdown per customer, retur, dan ringkasan pajak/DP/piutang.
   - [x] Redesain halaman `resources/js/pages/portal/manager/reports.tsx` menjadi tampilan laporan detail berlapis (Multi-Tab + Tabel Rincian Invoice/Customer/Produk/Retur + Cetak PDF Resmi & Export CSV).
-- [x] **Tahap 5 — Bagian Manajer Terkait Laporan Neraca (ISSUE-06)**
+- [x] **Tahap 5 — Bagian Manajer Terkait Laporan Keuangan Penjualan (ISSUE-06)**
   - [x] Buat method `ManagerController@neraca` dan rute `GET /manager/neraca`.
-  - [x] Buat halaman `resources/js/pages/portal/manager/neraca.tsx` (Neraca Aktiva vs Pasiva, indikator *Balanced*, drill-down rincian akun, filter periode, dan cetak PDF/Export CSV) serta tambahkan menu **Laporan Neraca** di `app-sidebar.tsx`.
+  - [x] Buat halaman `resources/js/pages/portal/manager/neraca.tsx` (Rekonsiliasi Penjualan Diterbitkan vs Realisasi Kas, Piutang & Retur, indikator *Balanced*, drill-down per customer/piutang/retur, filter periode, dan cetak PDF/Export CSV) serta tambahkan menu **Laporan Keuangan Penjualan** di `app-sidebar.tsx`.
 - [x] **Tahap 6 — Verifikasi, Seeder Demo & Pengujian (ISSUE-07)**
   - [x] Update `erd.md` dan skrip diagram use case (`generate_uc.cjs` / `generate_uc_2.cjs`).
   - [x] Jalankan migrasi, seeder, build aset frontend (`npm run build`), dan pengujian fitur (*Pest / PHPUnit tests*).

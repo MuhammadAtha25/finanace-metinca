@@ -140,7 +140,7 @@ export default function ManagerNeraca({
     >('customers');
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: t('Neraca Penjualan (Sales Balance Sheet)', 'Sales Balance Sheet'), href: '/manager/neraca' },
+        { title: t('Laporan Keuangan Penjualan', 'Sales Financial Report'), href: '/manager/neraca' },
     ];
 
     const formatCurrency = (val: number) => formatPrice(Number(val || 0));
@@ -157,7 +157,7 @@ export default function ManagerNeraca({
     const handleValidateNeracaSubmission = (submissionId: number) => {
         router.post(
             `/manager/neraca/${submissionId}/validate`,
-            { notes: 'Laporan Neraca Penjualan telah diperiksa dan disahkan oleh Manager Accounting.' },
+            { notes: 'Laporan Keuangan Penjualan telah diperiksa dan disahkan oleh Manager Accounting.' },
             { preserveScroll: true },
         );
     };
@@ -185,7 +185,7 @@ export default function ManagerNeraca({
 
         const link = document.createElement('a');
         link.setAttribute('href', encodeURI(csvContent));
-        link.setAttribute('download', `Neraca_Penjualan_Metinca_${selectedPeriod}.csv`);
+        link.setAttribute('download', `Laporan_Keuangan_Penjualan_Metinca_${selectedPeriod}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -206,7 +206,7 @@ export default function ManagerNeraca({
 
     return (
         <div className="space-y-6 p-4 sm:p-6 lg:p-8">
-            <Head title={t('Neraca Penjualan (Sales Balance Sheet)', 'Sales Balance Sheet')} />
+            <Head title={t('Laporan Keuangan Penjualan', 'Sales Financial Report')} />
 
             {/* Flash Messages */}
             {props.flash?.success && (
@@ -223,7 +223,7 @@ export default function ManagerNeraca({
                             PT. METINCA PRIMA INDUSTRIAL WORKS
                         </h2>
                         <p className="text-sm font-semibold text-slate-600">
-                            {t('LAPORAN NERACA PENJUALAN (SALES BALANCE SHEET & RECONCILIATION)', 'SALES BALANCE SHEET & RECONCILIATION REPORT')}
+                            {t('LAPORAN KEUANGAN PENJUALAN (SALES FINANCIAL & RECONCILIATION REPORT)', 'SALES FINANCIAL & RECONCILIATION REPORT')}
                         </p>
                         <p className="text-xs text-slate-500">
                             {t('Posisi Penjualan per', 'Sales Position as of')} {cutoff_date}
@@ -231,7 +231,7 @@ export default function ManagerNeraca({
                     </div>
                     <div className="text-right text-xs">
                         <p className="font-mono">{new Date().toLocaleString('id-ID')}</p>
-                        <p className="text-slate-500">{t('Status Keseimbangan: Seimbang (Balanced)', 'Balance Status: Balanced')}</p>
+                        <p className="text-slate-500">{t('Status Pembukuan: Seimbang (Reconciled)', 'Reconciliation Status: Balanced')}</p>
                     </div>
                 </div>
             </div>
@@ -241,12 +241,12 @@ export default function ManagerNeraca({
                 <div>
                     <h1 className="flex items-center gap-2.5 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                         <Scale className="size-7 text-indigo-600" />
-                        {t('Neraca Penjualan (Sales Balance Sheet)', 'Sales Balance Sheet')}
+                        {t('Laporan Keuangan Penjualan', 'Sales Financial Report')}
                     </h1>
                     <p className="mt-1 text-sm text-slate-500">
                         {t(
-                            `Timbangan transaksi penjualan per ${cutoff_date}: menyeimbangkan Nilai Faktur Diterbitkan dengan Realisasi Pembayaran Kas, Sisa Piutang, dan Retur.`,
-                            `Sales transaction balance as of ${cutoff_date}: balancing Total Invoiced Sales against Cash Collections, Outstanding Receivables, and Returns.`
+                            `Rekonsiliasi keuangan penjualan per ${cutoff_date}: menyeimbangkan Nilai Faktur Diterbitkan dengan Realisasi Pembayaran Kas, Sisa Piutang, dan Retur.`,
+                            `Sales financial reconciliation as of ${cutoff_date}: balancing Total Invoiced Sales against Cash Collections, Outstanding Receivables, and Returns.`
                         )}
                     </p>
                 </div>
@@ -377,8 +377,8 @@ export default function ManagerNeraca({
                     <div>
                         <h4 className="text-sm font-bold tracking-tight">
                             {neraca.is_balanced
-                                ? t('STATUS NERACA: SEIMBANG (BALANCED)', 'BALANCE SHEET STATUS: BALANCED')
-                                : t('STATUS NERACA: TIDAK SEIMBANG', 'BALANCE SHEET STATUS: UNBALANCED')}
+                                ? t('STATUS PEMBUKUAN PENJUALAN: SEIMBANG (RECONCILED)', 'SALES RECONCILIATION STATUS: BALANCED')
+                                : t('STATUS PEMBUKUAN PENJUALAN: TIDAK SEIMBANG', 'SALES RECONCILIATION STATUS: UNBALANCED')}
                         </h4>
                         <p className="text-xs opacity-90">
                             {t(
@@ -547,7 +547,7 @@ export default function ManagerNeraca({
                     <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
                         <div>
                             <CardTitle className="text-base">
-                                {t('Rincian Transaksi Pembentuk Neraca Penjualan (Audit Drill-Down)', 'Sales Balance Sheet Component Breakdown (Audit Drill-Down)')}
+                                {t('Rincian Transaksi Pembentuk Laporan Keuangan Penjualan (Audit Drill-Down)', 'Sales Financial Report Component Breakdown (Audit Drill-Down)')}
                             </CardTitle>
                             <CardDescription>
                                 {t(
@@ -737,7 +737,7 @@ export default function ManagerNeraca({
                         <Table>
                             <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
                                 <TableRow>
-                                    <TableHead>{t('Periode Neraca', 'Balance Sheet Period')}</TableHead>
+                                    <TableHead>{t('Periode Laporan', 'Report Period')}</TableHead>
                                     <TableHead>{t('Diajukan Oleh', 'Submitted By')}</TableHead>
                                     <TableHead>{t('Waktu Pengajuan', 'Submitted At')}</TableHead>
                                     <TableHead>{t('Status Validasi', 'Validation Status')}</TableHead>
@@ -749,7 +749,7 @@ export default function ManagerNeraca({
                                 {neraca_submissions.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={6} className="h-24 text-center text-slate-500">
-                                            {t('Belum ada riwayat pengajuan Neraca Penjualan.', 'No validation submissions recorded.')}
+                                            {t('Belum ada riwayat pengajuan Laporan Keuangan Penjualan.', 'No validation submissions recorded.')}
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -786,7 +786,7 @@ export default function ManagerNeraca({
                                                         className="h-7 bg-emerald-600 px-2 text-xs font-medium text-white hover:bg-emerald-700"
                                                     >
                                                         <ShieldCheck className="mr-1 size-3.5" />
-                                                        {t('Sahkan Neraca', 'Approve & Validate')}
+                                                        {t('Sahkan Laporan', 'Approve & Validate')}
                                                     </Button>
                                                 ) : (
                                                     <span className="text-xs text-slate-500">
@@ -829,7 +829,7 @@ export default function ManagerNeraca({
 ManagerNeraca.layout = {
     breadcrumbs: [
         {
-            title: 'Neraca Penjualan (Sales Balance Sheet)',
+            title: 'Laporan Keuangan Penjualan',
             href: '/manager/neraca',
         },
     ],

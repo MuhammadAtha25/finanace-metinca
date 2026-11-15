@@ -233,7 +233,7 @@ export default function Inbox({ invoices, reports }: InboxProps) {
                                                             {rep.type === 'monthly'
                                                                 ? 'Bulanan'
                                                                 : rep.type === 'neraca'
-                                                                  ? 'Laporan Neraca'
+                                                                  ? 'Laporan Keuangan Penjualan'
                                                                   : 'Tahunan'}
                                                         </span>
                                                         <span className="text-xs text-muted-foreground ml-2">({rep.period_start} - {rep.period_end})</span>
