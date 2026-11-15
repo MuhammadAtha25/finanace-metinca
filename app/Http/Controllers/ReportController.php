@@ -120,6 +120,7 @@ class ReportController extends Controller
                 'days_late' => (int) $daysLate,
                 'penalty_amount' => round($penaltyAmount, 2),
                 'status' => $inv->status,
+                'total_quantity' => (int) collect($items)->sum('quantity'),
                 'items' => $items,
                 'returns' => $returns,
             ];
@@ -135,6 +136,7 @@ class ReportController extends Controller
                     'customer_name' => $row['customer_name'],
                     'customer_email' => $row['customer_email'],
                     'invoices_count' => 0,
+                    'total_quantity' => 0,
                     'total_sales' => 0.0,
                     'paid_amount' => 0.0,
                     'remaining_balance' => 0.0,
@@ -143,6 +145,7 @@ class ReportController extends Controller
                 ];
             }
             $customerSummaryMap[$cId]['invoices_count']++;
+            $customerSummaryMap[$cId]['total_quantity'] += $row['total_quantity'];
             $customerSummaryMap[$cId]['total_sales'] += $row['total_amount'];
             $customerSummaryMap[$cId]['paid_amount'] += $row['paid_amount'];
             $customerSummaryMap[$cId]['remaining_balance'] += $row['remaining_balance'];

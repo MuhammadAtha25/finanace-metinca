@@ -310,6 +310,8 @@ test('customer recap report returns detailed invoice breakdown, items, return de
             ->where('invoices.0.return_amount', 550000)
             ->where('invoices.0.remaining_balance', 4000000)
             ->where('invoices.0.days_late', 2)
+            ->where('invoices.0.total_quantity', 10)
+            ->where('customerSummaries.0.total_quantity', 10)
         );
 });
 

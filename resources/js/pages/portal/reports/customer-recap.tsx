@@ -75,6 +75,7 @@ interface InvoiceDetail {
     days_late: number;
     penalty_amount: number;
     status: string;
+    total_quantity: number;
     items: InvoiceLineItem[];
     returns: InvoiceReturnNote[];
 }
@@ -84,6 +85,7 @@ interface CustomerSummaryRow {
     customer_name: string;
     customer_email: string;
     invoices_count: number;
+    total_quantity: number;
     total_sales: number;
     paid_amount: number;
     remaining_balance: number;
@@ -174,6 +176,7 @@ export default function CustomerRecap({
             'Denda',
             'Status',
             'Rincian Produk',
+            'Total Qty',
         ];
 
         const csvRows = invoices.map((inv) => {
@@ -200,6 +203,7 @@ export default function CustomerRecap({
                 inv.penalty_amount,
                 inv.status,
                 productSummary || '-',
+                inv.total_quantity,
             ]
                 .map((val) => `"${String(val).replace(/"/g, '""')}"`)
                 .join(',');
@@ -470,6 +474,7 @@ export default function CustomerRecap({
                                     <TableRow>
                                         <TableHead>{t('Nama Customer', 'Customer Name')}</TableHead>
                                         <TableHead className="text-center">{t('Jml Faktur', 'Invoices')}</TableHead>
+                                        <TableHead className="text-center">{t('Total Qty', 'Total Qty')}</TableHead>
                                         <TableHead className="text-right">{t('Total Penjualan', 'Total Sales')}</TableHead>
                                         <TableHead className="text-right">{t('Sudah Dibayar', 'Paid / DP')}</TableHead>
                                         <TableHead className="text-right">{t('Sisa Piutang', 'Receivables')}</TableHead>
@@ -492,6 +497,9 @@ export default function CustomerRecap({
                                             </TableCell>
                                             <TableCell className="text-center">
                                                 <Badge variant="secondary">{cust.invoices_count}</Badge>
+                                            </TableCell>
+                                            <TableCell className="text-center font-mono text-xs font-semibold">
+                                                {cust.total_quantity.toLocaleString('id-ID')}
                                             </TableCell>
                                             <TableCell className="text-right font-mono font-bold">
                                                 {formatPrice(cust.total_sales)}
@@ -539,6 +547,8 @@ export default function CustomerRecap({
                                     <TableHead>{t('No. Invoice / Order', 'Invoice / Order')}</TableHead>
                                     <TableHead>{t('Tanggal & Validasi', 'Transaction & Validated')}</TableHead>
                                     <TableHead>{t('Customer & Sales Rep', 'Customer & Sales Rep')}</TableHead>
+                                    <TableHead>{t('Barang Dibeli', 'Purchased Items')}</TableHead>
+                                    <TableHead className="text-center">{t('Qty', 'Qty')}</TableHead>
                                     <TableHead>{t('Tipe / Kurs', 'Type / Currency')}</TableHead>
                                     <TableHead className="text-right">{t('Subtotal (DPP)', 'Subtotal')}</TableHead>
                                     <TableHead className="text-right">{t('PPN', 'VAT')}</TableHead>
@@ -553,7 +563,7 @@ export default function CustomerRecap({
                             <TableBody>
                                 {invoices.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={13} className="h-32 text-center text-muted-foreground">
+                                        <TableCell colSpan={15} className="h-32 text-center text-muted-foreground">
                                             <div className="flex flex-col items-center justify-center gap-2">
                                                 <Search className="size-8 opacity-30" />
                                                 {t('Tidak ada data transaksi yang sesuai dengan filter.', 'No transaction records match the selected filters.')}
@@ -581,7 +591,7 @@ export default function CustomerRecap({
                                                             {inv.invoice_number}
                                                         </div>
                                                         <div className="text-[11px] text-muted-foreground">
-                                                            {inv.order_id} ({inv.items.length} item)
+                                                            {inv.order_id}
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className="whitespace-nowrap text-xs">
@@ -593,6 +603,38 @@ export default function CustomerRecap({
                                                     <TableCell>
                                                         <div className="font-semibold text-xs">{inv.customer_name}</div>
                                                         <div className="text-[11px] text-muted-foreground">Sales: {inv.sales_rep}</div>
+                                                    </TableCell>
+                                                    <TableCell className="min-w-[220px]">
+                                                        {inv.items.length === 0 ? (
+                                                            <span className="text-xs text-muted-foreground">-</span>
+                                                        ) : (
+                                                            <div className="space-y-1">
+                                                                {inv.items.map((item, idx) => (
+                                                                    <div key={idx} className="flex items-start justify-between gap-2 text-xs leading-snug">
+                                                                        <span className="font-medium text-foreground">
+                                                                            {item.product_name}
+                                                                            {item.product_code !== '-' && (
+                                                                                <span className="ml-1 font-mono text-[10px] text-muted-foreground">
+                                                                                    ({item.product_code})
+                                                                                </span>
+                                                                            )}
+                                                                        </span>
+                                                                        <span className="shrink-0 font-mono text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
+                                                                            {item.quantity} {item.unit}
+                                                                        </span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="text-center whitespace-nowrap">
+                                                        {inv.items.length === 0 ? (
+                                                            <span className="text-xs text-muted-foreground">-</span>
+                                                        ) : (
+                                                            <Badge variant="secondary" className="font-mono text-xs">
+                                                                {inv.total_quantity.toLocaleString('id-ID')}
+                                                            </Badge>
+                                                        )}
                                                     </TableCell>
                                                     <TableCell className="whitespace-nowrap">
                                                         {inv.invoice_type === 'domestik' ? (
@@ -645,7 +687,7 @@ export default function CustomerRecap({
                                                 {/* Expandable Line Items & Return Notes */}
                                                 {isExpanded && (
                                                     <TableRow className="bg-muted/20 hover:bg-muted/20">
-                                                        <TableCell colSpan={13} className="p-4">
+                                                        <TableCell colSpan={15} className="p-4">
                                                             <div className="space-y-4">
                                                                 <div>
                                                                     <h5 className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
