@@ -119,6 +119,16 @@ test('detailed accounting report submission and manager validation trigger notif
     $report->refresh();
     expect($report->status)->toBe('validated');
     expect(AppNotification::where('user_id', $this->accountingUser->id)->where('type', 'report_validated')->exists())->toBeTrue();
+
+    // Staff Accounting inbox displays validation_notes & validator name
+    $this->actingAs($this->accountingUser)
+        ->get('/accounting/inbox')
+        ->assertStatus(200)
+        ->assertInertia(fn ($page) => $page
+            ->component('portal/accounting/inbox')
+            ->where('reports.0.validation_notes', 'Laporan lengkap dan disetujui.')
+            ->where('reports.0.validated_by_name', $this->managerUser->name)
+        );
 });
 
 test('sales financial report (laporan keuangan penjualan) page renders balanced sales issued and settlement', function () {

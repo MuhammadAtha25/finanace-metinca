@@ -1,5 +1,5 @@
 import { Head, useForm, router } from '@inertiajs/react';
-import { ClipboardList, Check, X, Eye, Clock, Send, BarChart, FileText } from 'lucide-react';
+import { ClipboardList, Check, X, Eye, Clock, Send, BarChart, FileText, MessageSquare } from 'lucide-react';
 import * as React from 'react';
 import { useCurrency } from '@/components/currency-context';
 import { useLanguage } from '@/components/language-context';
@@ -39,6 +39,7 @@ interface ReportItem {
     status: string;
     created_at: string;
     validation_notes: string | null;
+    validated_by_name?: string | null;
 }
 
 interface InboxProps {
@@ -225,29 +226,54 @@ export default function Inbox({ invoices, reports }: InboxProps) {
                                 {reports.length > 0 && (
                                     <div className="mt-6 pt-6 border-t">
                                         <h4 className="text-sm font-semibold mb-3">{t('Riwayat Laporan', 'Report History')}</h4>
-                                        <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
+                                        <div className="space-y-2.5 max-h-72 overflow-y-auto pr-2">
                                             {reports.map(rep => (
-                                                <div key={rep.id} className="flex items-center justify-between p-3 bg-muted/40 border rounded-md text-sm">
-                                                    <div>
-                                                        <span className="font-semibold">
-                                                            {rep.type === 'monthly'
-                                                                ? 'Bulanan'
-                                                                : rep.type === 'neraca'
-                                                                  ? 'Laporan Keuangan Penjualan'
-                                                                  : 'Tahunan'}
-                                                        </span>
-                                                        <span className="text-xs text-muted-foreground ml-2">({rep.period_start} - {rep.period_end})</span>
+                                                <div key={rep.id} className="flex flex-col gap-2 p-3 bg-muted/40 border rounded-md text-sm">
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <div>
+                                                            <span className="font-semibold">
+                                                                {rep.type === 'monthly'
+                                                                    ? 'Bulanan'
+                                                                    : rep.type === 'neraca'
+                                                                      ? 'Laporan Keuangan Penjualan'
+                                                                      : 'Tahunan'}
+                                                            </span>
+                                                            <span className="text-xs text-muted-foreground ml-2">({rep.period_start} - {rep.period_end})</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-3 shrink-0">
+                                                            <span className="text-xs text-muted-foreground">{rep.created_at}</span>
+                                                            <Badge variant="outline" className={
+                                                                rep.status === 'validated' ? 'bg-green-50 text-green-700 border-green-200' :
+                                                                rep.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' :
+                                                                'bg-blue-50 text-blue-700 border-blue-200'
+                                                            }>
+                                                                {rep.status}
+                                                            </Badge>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex items-center gap-3">
-                                                        <span className="text-xs text-muted-foreground">{rep.created_at}</span>
-                                                        <Badge variant="outline" className={
-                                                            rep.status === 'validated' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                            rep.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' :
-                                                            'bg-blue-50 text-blue-700 border-blue-200'
-                                                        }>
-                                                            {rep.status}
-                                                        </Badge>
-                                                    </div>
+
+                                                    {(rep.validation_notes || rep.status === 'rejected') && (
+                                                        <div
+                                                            className={
+                                                                rep.status === 'rejected'
+                                                                    ? 'rounded border border-red-200 bg-red-50/70 px-3 py-2 text-xs text-red-800 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300'
+                                                                    : 'rounded border border-emerald-200 bg-emerald-50/70 px-3 py-2 text-xs text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300'
+                                                            }
+                                                        >
+                                                            <div className="flex items-center gap-1.5 font-semibold mb-0.5">
+                                                                <MessageSquare className="size-3.5 shrink-0" />
+                                                                <span>
+                                                                    {rep.status === 'rejected'
+                                                                        ? t('Catatan Penolakan Manager', 'Manager Rejection Note')
+                                                                        : t('Catatan Manager', 'Manager Note')}
+                                                                    {rep.validated_by_name ? ` (${rep.validated_by_name})` : ''}
+                                                                </span>
+                                                            </div>
+                                                            <p className="whitespace-pre-wrap leading-relaxed">
+                                                                {rep.validation_notes || t('Tidak ada catatan tambahan dari Manager.', 'No additional notes from Manager.')}
+                                                            </p>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
